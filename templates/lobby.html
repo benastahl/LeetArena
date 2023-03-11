@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="UTF-8">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="../static/styles/defaults.css">
+    <link rel="stylesheet" href="../static/styles/waiting_room.css">
+    <link rel="stylesheet" href="../static/styles/nav_bar.css">
+      <link rel="icon" href="../static/images/coding-arena-logo.png">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Lobby - CodeArena </title>
+   </head>
+
+  <!-- Loading Activation -->
+  <link href="../static/styles/loading.css" rel="stylesheet">
+  <div class="loading-overlay"></div>
+  <script src="../static/scripts/loading.js" ></script>
+
+  <body>
+    <section>
+        <nav>
+          <img onclick="location.href = '/'; activateLoadingScreen(null)" class="navbar-logo" src="../static/images/coding-arena-logo.png" alt="CodeArena-logo">
+
+            {% if not user %}
+              <div class="profile-details">
+                <i class="bx bx-user-circle guest-profile-picture"></i>
+                <span class="admin_name">{{user.first_name | capitalize}} {{user.last_name | capitalize }}</span>
+                <i class='arrow bx bx-chevron-down' ></i>
+
+              </div>
+              <div style="visibility: hidden" class="profile-dropdown">
+                      <ul>
+                          <li id="profile-selection" onclick="location.href = '/profile'" ><a href="/profile">Profile</a></li>
+                          <li onclick="document.location.href = document.location.origin + '/settings'" id="settings-selection">Settings</li>
+                          {% if user.staff %}
+                              <script>document.querySelector(".profile-dropdown").style.marginTop = "250px";</script>
+                              <li onclick="location.href = '/staff-dashboard'" ><a href="/staff-dashboard">Staff Dashboard</a></li>
+                          {% endif %}
+                          {% if user.admin %}
+                              <script>document.querySelector(".profile-dropdown").style.marginTop = "300px";</script>
+                              <li onclick="location.href = '/admin-dashboard'" ><a href="/admin-dashboard">Admin Dashboard</a></li>
+
+                          {% endif %}
+                          <li onclick="location.href = '/logout'" class="last-option"><a href="/logout">Logout</a></li>
+                      </ul>
+                </div>
+            {% endif %}
+
+      </nav>
+
+        <div class="content">
+          <h1>benastahl, welcome to the lobby!</h1>
+
+        <form method="post" id="start-game" action="/start-game" class="lobby-section">
+            <div class="lobby-container">
+                <div class="controls">
+                    <h2 class="controls-main-header">Lobby Controls</h2>
+                    <h3 class="control-header">Game Mode</h3>
+                    <div class="game-mode-select game-option-container">
+                        <input onclick="selectGameOption(this.id, 'game-mode-select')" value="DUEL" type="button" id="duel" class="game-option game-mode selected">
+                        <input onclick="selectGameOption(this.id, 'game-mode-select')" value="TEAM BATTLE" type="button" id="team-battle" class="game-option game-mode">
+                        <input onclick="selectGameOption(this.id, 'game-mode-select')" value="BATTLE" type="button" id="battle" class="game-option game-mode">
+                    </div>
+                    <h3 class="control-header">Difficulty</h3>
+                    <div class="game-difficulty-select game-option-container">
+                        <input onclick="selectGameOption(this.id, 'game-difficulty-select')" value="EASY" type="button" id="easy-difficulty" class="game-option game-mode selected">
+                        <input onclick="selectGameOption(this.id, 'game-difficulty-select')" value="MEDIUM" type="button" id="medium-difficulty" class="game-option game-mode">
+                        <input onclick="selectGameOption(this.id, 'game-difficulty-select')" value="HARD" type="button" id="hard-difficulty" class="game-option game-mode">
+                    </div>
+                    <h3 class="control-header">Language(s)</h3>
+                    <div class="game-language-select game-option-container">
+                        <input onclick="selectGameOption(this.id, 'game-language-select')" value="PYTHON3" type="button" id="python-language" class="game-option game-language selected">
+                        <input onclick="selectGameOption(this.id, 'game-language-select')" value="JAVA" type="button" id="java-language" class="game-option game-language">
+                        <input onclick="selectGameOption(this.id, 'game-language-select')" value="JAVASCRIPT" type="button" id="javascript-language" class="game-option game-language">
+                        <input onclick="selectGameOption(this.id, 'game-language-select')" value="C++" type="button" id="c++-language" class="game-option game-language">
+                    </div>
+                </div>
+                <div class="lobby">
+                    <h2 class="controls-main-header">Lobby</h2>
+                    <div class="player-container">
+                        <div class="player">
+                            <img src="https://c4.wallpaperflare.com/wallpaper/273/268/863/appa-avatar-the-last-airbender-glasses-wallpaper-thumb.jpg" class="player-picture" alt="benastahl pfp">
+                            <div class="player-name">benastahl</div>
+                            <div class="player-level">13</div>
+                            <div class="player-streak">6</div>
+                        </div>
+                        <div class="player">
+                            <img src="https://c4.wallpaperflare.com/wallpaper/273/268/863/appa-avatar-the-last-airbender-glasses-wallpaper-thumb.jpg" class="player-picture" alt="benastahl pfp">
+                            <div class="player-name">benastahl</div>
+                            <div class="player-level">13</div>
+                            <div class="player-streak">6</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+      </div>
+        <button class="game-option start-game-button" form="start-game" type="submit">Start Game</button>
+
+    </section>
+
+    <script id="selectGameMode">
+      function selectGameOption (id, option_type_class) {
+          let elemGameOptionsContainer = document.querySelector("." + option_type_class);
+          let elemGameOptions = document.querySelectorAll("." + option_type_class + " input");
+          let selectedOption = document.getElementById(id);
+          let multOption = elemGameOptionsContainer.classList.contains("mult");
+          let de
+          let selectCount = 1
+
+          // Deselects all
+          for (let i = 0; i < elemGameOptions.length; i++) {
+              let elemGameOption = elemGameOptions[i];
+              if (elemGameOption.classList.contains("selected") && !multOption) {
+                  elemGameOption.classList.toggle("selected")
+              } else if (elemGameOption.classList.contains("selected") && multOption) {
+                  selectCount++;
+              }
+          }
+
+          console.log("selectCount: " + selectCount)
+
+          // Selects one selected
+          if (!selectedOption.classList.contains("selected") || multOption){
+              selectedOption.classList.toggle("selected");
+          }
+
+      }
+  </script>
+
+  </body>
+</html>

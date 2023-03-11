@@ -1,0 +1,170 @@
+
+body {
+    background-image: url("../images/code-arena-background-roman.jpeg");
+    background-size: 1780px;
+}
+.lobby-section {
+    display: flex;
+    flex-direction: column;
+    padding: 120px 30px 10px 30px;
+
+}
+.lobby-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+.content h1 {
+    position: relative;
+    top: 110px;
+    text-align: center;
+    margin-bottom: 10px;
+
+    font-size: 30px;
+
+    color: #EC625F;
+
+}
+.controls, .lobby {
+    display: flex;
+    flex-direction: column;
+    /*margin: auto;*/
+
+    width: 40%;
+    border-radius: 10px;
+    padding: 20px;
+
+    box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);;
+    background: rgba(82, 82, 82, 0.78);
+}
+.controls-main-header {
+    color: #f4f4f4;
+    font-size: 30px;
+    border-bottom: 1px solid #313131;
+}
+.control-header {
+
+    margin-top: 10px;
+
+    font-size: 20px;
+    color: #f4f4f4;
+}
+.game-option-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+
+    width: 100%;
+    border-radius: 5px;
+
+    border: 1px solid #313131;
+
+
+}
+.game-option {
+    padding: 10px;
+    margin: 5px;
+
+    border-radius: 15px;
+
+    color: #313131;
+    background: #f4f4f4;
+    border: 2px solid #313131;
+    font-weight: 700;
+    font-size: 20px;
+
+    cursor: pointer;
+}
+.selected {
+    background: #EC625F !important;
+}
+.game-option:not(.selected):hover {
+    background: rgb(238, 141, 140) !important;  /* F17B79FF */
+}
+.game-option.start-game-button {
+    position: fixed;
+    bottom: 10px;
+    left: 42%;
+
+    width: 15%;
+
+    background: rgba(244, 244, 244, 0.8);
+}
+.game-option.start-game-button:hover {
+    transform: scale(1.1);
+}
+
+.lobby .player-container {
+    display: flex;
+    flex-direction: column;
+
+    margin-top: 10px;
+    padding: 10px;
+
+    border: 1px solid #313131;
+    border-radius: 5px;
+}
+.player-container .player {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.player .player-picture {
+
+    width: 51px;
+    height: 51px;
+
+    border: 2px solid #313131;
+    border-radius: 15px 0 0 15px;
+
+}
+.player .player-name {
+    display: flex;
+    flex-direction: row;
+    padding: 5px 20px;
+
+    font-size: 25px;
+    font-weight: 750;
+    width: 300px;
+
+    color: #f4f4f4;
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid #313131;
+    border-left: 0;
+    border-radius: 0 20px 20px 0;
+
+    overflow: auto;
+}
+.player .player-streak {
+    padding: 10px 10px;
+
+    font-weight: 700;
+    font-size: 20px;
+    text-align: center;
+    color: black;
+
+    background-image: url("../images/code-arena-fire.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center bottom;
+    border-radius: 50px;
+}
+.player .player-level {
+    display: flex;
+
+    width: 50px;
+
+    font-weight: 750;
+    color: #f4f4f4;
+}
+
+
+/* Mobile adaptations */
+@media screen and (max-width: 650px) {
+    .controls {
+        width: 80%;
+    }
+}
