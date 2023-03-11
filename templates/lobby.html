@@ -51,16 +51,17 @@
         <div class="content">
           <h1>benastahl, welcome to the lobby!</h1>
 
-        <form method="post" id="start-game" action="/start-game" class="lobby-section">
+        <div class="lobby-section">
             <div class="lobby-container">
                 <div class="controls">
                     <h2 class="controls-main-header">Lobby Controls</h2>
                     <h3 class="control-header">Game Mode</h3>
-                    <div class="game-mode-select game-option-container">
-                        <input onclick="selectGameOption(this.id, 'game-mode-select')" value="DUEL" type="button" id="duel" class="game-option game-mode selected">
-                        <input onclick="selectGameOption(this.id, 'game-mode-select')" value="TEAM BATTLE" type="button" id="team-battle" class="game-option game-mode">
-                        <input onclick="selectGameOption(this.id, 'game-mode-select')" value="BATTLE" type="button" id="battle" class="game-option game-mode">
-                    </div>
+                    <form method="post" id="start-game" action="/start-game" class="game-mode-select game-option-container">
+                        <input form="start-game" onclick="selectGameOption(this, 'game-mode-select')" name="DUEL selected"         value="DUEL"        type="button" class="game-option game-mode selected">
+                        <input onclick="selectGameOption(this, 'game-mode-select')" name="TEAM BATTLE"  value="TEAM BATTLE" type="button" class="game-option game-mode">
+                        <input onclick="selectGameOption(this, 'game-mode-select')" name="BATTLE"       value="BATTLE"      type="button" class="game-option game-mode">
+                        <input style="display: none;" type="text" name="benny" value="hello again">
+                    </form>
                     <h3 class="control-header">Difficulty</h3>
                     <div class="game-difficulty-select game-option-container">
                         <input onclick="selectGameOption(this.id, 'game-difficulty-select')" value="EASY" type="button" id="easy-difficulty" class="game-option game-mode selected">
@@ -76,45 +77,55 @@
                     </div>
                 </div>
                 <div class="lobby">
-                    <h2 class="controls-main-header">Lobby</h2>
+                    <h2 class="controls-main-header">Lobby (2 players)</h2>
                     <div class="player-container">
-                        <div class="player">
-                            <img src="https://c4.wallpaperflare.com/wallpaper/273/268/863/appa-avatar-the-last-airbender-glasses-wallpaper-thumb.jpg" class="player-picture" alt="benastahl pfp">
-                            <div class="player-name">benastahl</div>
-                            <div class="player-level">13</div>
-                            <div class="player-streak">6</div>
+                        <div class="player-card-container">
+                            <div class="player-card">
+                                <div class="left side">
+                                    <img src="https://c4.wallpaperflare.com/wallpaper/273/268/863/appa-avatar-the-last-airbender-glasses-wallpaper-thumb.jpg" class="player-picture" alt="benastahl pfp">
+                                    <div class="player-name">benastahl</div>
+                                </div>
+                                <div class="right side">
+                                    <div class="player-level">13</div>
+                                </div>
+                            </div>
+                            <i class='bx bxs-user-badge player-role'></i>
                         </div>
-                        <div class="player">
-                            <img src="https://c4.wallpaperflare.com/wallpaper/273/268/863/appa-avatar-the-last-airbender-glasses-wallpaper-thumb.jpg" class="player-picture" alt="benastahl pfp">
-                            <div class="player-name">benastahl</div>
-                            <div class="player-level">13</div>
-                            <div class="player-streak">6</div>
+                        <div class="player-card-container">
+                            <div class="player-card">
+                                <div class="left side">
+                                    <img src="https://c4.wallpaperflare.com/wallpaper/273/268/863/appa-avatar-the-last-airbender-glasses-wallpaper-thumb.jpg" class="player-picture" alt="benastahl pfp">
+                                    <div class="player-name">benastahl</div>
+                                </div>
+                                <div class="right side">
+                                    <div class="player-level">13</div>
+                                </div>
+                            </div>
+                            <i class='bx bxs-user-rectangle player-role'></i>
                         </div>
                     </div>
                 </div>
             </div>
-        </form>
+        </div>
       </div>
         <button class="game-option start-game-button" form="start-game" type="submit">Start Game</button>
 
     </section>
 
     <script id="selectGameMode">
-      function selectGameOption (id, option_type_class) {
+      function selectGameOption (selectedOption, option_type_class) {
           let elemGameOptionsContainer = document.querySelector("." + option_type_class);
           let elemGameOptions = document.querySelectorAll("." + option_type_class + " input");
-          let selectedOption = document.getElementById(id);
           let multOption = elemGameOptionsContainer.classList.contains("mult");
-          let de
           let selectCount = 1
 
           // Deselects all
           for (let i = 0; i < elemGameOptions.length; i++) {
               let elemGameOption = elemGameOptions[i];
+              elemGameOption.name = elemGameOption.name.replaceAll(" selected", "");
               if (elemGameOption.classList.contains("selected") && !multOption) {
-                  elemGameOption.classList.toggle("selected")
-              } else if (elemGameOption.classList.contains("selected") && multOption) {
-                  selectCount++;
+                  elemGameOption.classList.toggle("selected");
+
               }
           }
 
@@ -123,6 +134,7 @@
           // Selects one selected
           if (!selectedOption.classList.contains("selected") || multOption){
               selectedOption.classList.toggle("selected");
+              selectedOption.name += " selected"
           }
 
       }

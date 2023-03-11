@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect
+from flask import Flask, render_template, redirect, request
 
 #  TODO: friend system
 #  TODO: timed challenges
@@ -17,6 +17,10 @@ def display_lobby():
 
 @app.route("/start-game", methods=["POST"])
 def start_game():
+    print("Hello")
+    print(request.form)
+    for form in request.form:
+        print(form)
     return redirect("/lobby")
 
 

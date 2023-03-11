@@ -19,11 +19,14 @@ body {
     position: relative;
     top: 110px;
     text-align: center;
-    margin-bottom: 10px;
+    margin: auto auto 10px auto;
 
+    width: 38%;
+
+    border-radius: 5px;
     font-size: 30px;
-
-    color: #EC625F;
+    color: #f4f4f4;
+    background: rgba(236, 98, 95, 0.63);
 
 }
 .controls, .lobby {
@@ -106,39 +109,45 @@ body {
     border: 1px solid #313131;
     border-radius: 5px;
 }
-.player-container .player {
+.player-container .player-card-container {
     display: flex;
     flex-direction: row;
     align-items: center;
-    margin-bottom: 10px;
 }
-.player .player-picture {
 
-    width: 51px;
-    height: 51px;
-
-    border: 2px solid #313131;
-    border-radius: 15px 0 0 15px;
-
-}
-.player .player-name {
+/* Player Tag/Card */
+.player-card-container .player-card {
     display: flex;
     flex-direction: row;
-    padding: 5px 20px;
+    margin-bottom: 10px;
+    justify-content: space-between;
+    align-items: center;
 
-    font-size: 25px;
-    font-weight: 750;
-    width: 300px;
+    width: 90%;
 
     color: #f4f4f4;
     background: rgba(255, 255, 255, 0.2);
     border: 2px solid #313131;
-    border-left: 0;
-    border-radius: 0 20px 20px 0;
+    border-radius: 15px;
 
     overflow: auto;
 }
-.player .player-streak {
+.player-card .player-picture {
+
+    width: 50px;
+    height: 50px;
+
+    border-right: 2px solid #313131;
+
+    object-fit: cover;
+}
+.player-card .player-name {
+    margin-left: 10px;
+
+    font-size: 25px;
+    font-weight: 750;
+}
+.player-card .player-streak {
     padding: 10px 10px;
 
     font-weight: 700;
@@ -152,15 +161,34 @@ body {
     background-position: center bottom;
     border-radius: 50px;
 }
-.player .player-level {
+.player-card .player-level {
     display: flex;
 
     width: 50px;
 
+    font-size: 25px;
     font-weight: 750;
     color: #f4f4f4;
 }
+.player-card .side {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
 
+/* Player Role (player, admin) tag */
+.player-card-container .player-role {
+    margin-left: 10px;
+
+    color: #f4f4f4;
+    border-radius: 50px;
+    font-size: 40px;
+}
+.player-role.bxs-user-badge {
+    color: #EC625F !important;
+}
+
+/* Player lobby status
 
 /* Mobile adaptations */
 @media screen and (max-width: 650px) {
