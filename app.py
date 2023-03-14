@@ -1,26 +1,36 @@
+import random, string, os, pymysql
+from dotenv import load_dotenv, find_dotenv
 from flask import Flask, render_template, redirect, request
+from flask_sqlalchemy import SQLAlchemy
 
-#  TODO: friend system
-#  TODO: timed challenges
-#  TODO: different difficulty daily challenges
-#    #13005A         #00337C          #1C82AD           #03C988
-# rgb(19, 0, 90) rgb(0, 51, 124) rgb(28, 130, 173) rgb(3, 201, 136)
 
+if not os.getenv("PUBLIC_ACTIVATED"):
+    assert load_dotenv(find_dotenv()), "Failed to load environment."
+
+pymysql.install_as_MySQLdb()
+db = SQLAlchemy()
 app = Flask(__name__)
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("CLEARDB_YELLOW_URL")
+db.init_app(app)
 
-@app.route("/lobby", methods=["GET"])
+
+@app.route("/lobby/<lobby_id>", methods=["GET"])
 def display_lobby():
     return render_template("lobby.html",
                            user=False
                            )
 
 
+@app.route("/create-lobby", methods=["POST"])
+def create_lobby():
+    join_code_length = 7
+    join_code = ''.join(random.choices(string.ascii_uppercase +
+                                       string.digits, k=join_code_length))
+    return redirect(f"/lobby/{join_code}")
+
+
 @app.route("/start-game", methods=["POST"])
 def start_game():
-    print("Hello")
-    print(request.form)
-    for form in request.form:
-        print(form)
     return redirect("/lobby")
 
 
@@ -35,7 +45,9 @@ def display_duel():
 def display_home():
     return render_template(
         "home.html",
-        user=False
+        user=False,
+        login_error=None,
+        signup_error=None,
     )
 
 
@@ -49,3 +61,13 @@ def display_test():
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
+
+#  TODO: friend system
+#  TODO: timed challenges
+#  TODO: different difficulty daily challenges
+
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String, unique=True, nullable=False)
+    email = db.Column(db.String)

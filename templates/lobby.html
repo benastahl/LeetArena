@@ -51,29 +51,31 @@
         <div class="content">
           <h1>benastahl, welcome to the lobby!</h1>
 
-        <div class="lobby-section">
+        <form class="lobby-section" method="post" id="start-game" action="/start-game">
             <div class="lobby-container">
                 <div class="controls">
                     <h2 class="controls-main-header">Lobby Controls</h2>
                     <h3 class="control-header">Game Mode</h3>
-                    <form method="post" id="start-game" action="/start-game" class="game-mode-select game-option-container">
-                        <input form="start-game" onclick="selectGameOption(this, 'game-mode-select')" name="DUEL selected"         value="DUEL"        type="button" class="game-option game-mode selected">
+                    <div class="game-mode-select game-option-container">
+                        <input onclick="selectGameOption(this, 'game-mode-select')" name="DUEL"         value="DUEL"        type="button" class="game-option game-mode selected">
                         <input onclick="selectGameOption(this, 'game-mode-select')" name="TEAM BATTLE"  value="TEAM BATTLE" type="button" class="game-option game-mode">
                         <input onclick="selectGameOption(this, 'game-mode-select')" name="BATTLE"       value="BATTLE"      type="button" class="game-option game-mode">
-                        <input style="display: none;" type="text" name="benny" value="hello again">
-                    </form>
+                        <input type="hidden" id="game-mode-select" name="game-mode" value="DUEL">
+                    </div>
                     <h3 class="control-header">Difficulty</h3>
                     <div class="game-difficulty-select game-option-container">
-                        <input onclick="selectGameOption(this.id, 'game-difficulty-select')" value="EASY" type="button" id="easy-difficulty" class="game-option game-mode selected">
-                        <input onclick="selectGameOption(this.id, 'game-difficulty-select')" value="MEDIUM" type="button" id="medium-difficulty" class="game-option game-mode">
-                        <input onclick="selectGameOption(this.id, 'game-difficulty-select')" value="HARD" type="button" id="hard-difficulty" class="game-option game-mode">
+                        <input onclick="selectGameOption(this, 'game-difficulty-select')" name="EASY"   value="EASY"    type="button" id="easy-difficulty"     class="game-option game-mode selected">
+                        <input onclick="selectGameOption(this, 'game-difficulty-select')" name="MEDIUM" value="MEDIUM"  type="button" id="medium-difficulty" class="game-option game-mode">
+                        <input onclick="selectGameOption(this, 'game-difficulty-select')" name="HARD"   value="HARD"    type="button" id="hard-difficulty"     class="game-option game-mode">
+                        <input type="hidden" id="game-difficulty-select" name="game-difficulty" value="EASY">
                     </div>
                     <h3 class="control-header">Language(s)</h3>
                     <div class="game-language-select game-option-container">
-                        <input onclick="selectGameOption(this.id, 'game-language-select')" value="PYTHON3" type="button" id="python-language" class="game-option game-language selected">
-                        <input onclick="selectGameOption(this.id, 'game-language-select')" value="JAVA" type="button" id="java-language" class="game-option game-language">
-                        <input onclick="selectGameOption(this.id, 'game-language-select')" value="JAVASCRIPT" type="button" id="javascript-language" class="game-option game-language">
-                        <input onclick="selectGameOption(this.id, 'game-language-select')" value="C++" type="button" id="c++-language" class="game-option game-language">
+                        <input onclick="selectGameOption(this, 'game-language-select')" name="PYTHON3"    value="PYTHON3"    type="button" id="python-language"     class="game-option game-language selected">
+                        <input onclick="selectGameOption(this, 'game-language-select')" name="JAVA"       value="JAVA"       type="button" id="java-language"       class="game-option game-language">
+                        <input onclick="selectGameOption(this, 'game-language-select')" name="JAVASCRIPT" value="JAVASCRIPT" type="button" id="javascript-language" class="game-option game-language">
+                        <input onclick="selectGameOption(this, 'game-language-select')" name="C++"        value="C++"        type="button" id="c++-language"        class="game-option game-language">
+                        <input type="hidden" id="game-language-select" name="game-language" value="PYTHON3">
                     </div>
                 </div>
                 <div class="lobby">
@@ -106,7 +108,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </form>
       </div>
         <button class="game-option start-game-button" form="start-game" type="submit">Start Game</button>
 
@@ -118,11 +120,10 @@
           let elemGameOptions = document.querySelectorAll("." + option_type_class + " input");
           let multOption = elemGameOptionsContainer.classList.contains("mult");
           let selectCount = 1
-
+          console.log(option_type_class)
           // Deselects all
           for (let i = 0; i < elemGameOptions.length; i++) {
               let elemGameOption = elemGameOptions[i];
-              elemGameOption.name = elemGameOption.name.replaceAll(" selected", "");
               if (elemGameOption.classList.contains("selected") && !multOption) {
                   elemGameOption.classList.toggle("selected");
 
@@ -134,7 +135,7 @@
           // Selects one selected
           if (!selectedOption.classList.contains("selected") || multOption){
               selectedOption.classList.toggle("selected");
-              selectedOption.name += " selected"
+              document.getElementById(option_type_class).value = selectedOption.name;
           }
 
       }

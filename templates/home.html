@@ -6,9 +6,9 @@
     <link rel="stylesheet" href="../static/styles/defaults.css">
     <link rel="stylesheet" href="../static/styles/home.css">
     <link rel="stylesheet" href="../static/styles/nav_bar.css">
-      <link rel="icon" href="../static/images/athleats-logo.png">
+      <link rel="icon" href="../static/images/coding-arena-logo.png">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Duel - CodeArena </title>
+    <title> Home - CodeArena </title>
    </head>
 
   <!-- Loading Activation -->
@@ -65,34 +65,19 @@
               </div>
                 <form onsubmit="activateLoadingScreen('submit-signup-button')" name="signup" action="/signup" method="post">
                     <label>
-                        <input required type="text" name="email" placeholder="whs email">
+                        <input required type="text" name="email" placeholder="email">
                     </label>
                     <label>
                         <input required type="password" name="pass" placeholder="password">
                     </label>
-                    <label for="grade"></label><select required class="form-selection" name="grade" id="grade">
-                            <option class="form-selection-placeholder" value="" disabled selected>grade</option>
-                            <option style="color: #f4f4f4" value="9">9</option>
-                            <option value="10">10</option>
-                            <option value="11">11</option>
-                            <option value="12">12</option>
-                          </select>
-                    <label for="sport_team"></label>
-                    <select required class="form-selection" name="sport_team" id="sport_team">
-                        <option class="form-selection-placeholder" disabled selected>{{ sport_season }} sport team</option>
-                        <option value="No Sport">No Sport</option>
-                        {% for team in sport_teams %}
-                        <option value="{{ team }}">{{ team }}</option>
-                        {% endfor %}
-                    </select>
                     <label for="tos"></label><select required class="form-selection" name="tos" id="tos">
-                            <option class="form-selection-placeholder" value="" disabled selected>terms of service</option>
-                            <option value="agree">agree</option>
-                          </select>
+                        <option class="form-selection-placeholder" value="" disabled selected>terms of service</option>
+                        <option value="agree">agree</option>
+                      </select>
                     <p style="display: none;" class="error-occurrence" id="signup-error">{{ signup_error }}</p>
                     <button id="submit-signup-button" type="submit" value="SIGNUP">SIGNUP</button>
                     <p class="message">Already have an account?
-                            <a href="/login">Login here</a>
+                            <a onclick="toggle_popup('signup-form-container'); toggle_popup('login-form-container');">Login here</a>
                           </p>
                     <a class="tos-agree-link" target="_blank" rel="noopener noreferrer" href="/terms-of-service">terms of service.</a>
                 </form>
@@ -115,7 +100,7 @@
                       <p style="display: none;" class="error-occurrence" id="login-error">{{ login_error }}</p>
                       <button id="submit-login-button" type="submit" value="LOGIN" >LOGIN</button>
                       <p class="message">Not registered?
-                        <a href="/login">Create an account</a>
+                        <a onclick="toggle_popup('login-form-container'); toggle_popup('signup-form-container')">Create an account</a>
                       </p>
                   </form>
               </div>
@@ -124,16 +109,21 @@
 
           <div class="home-header">
               {% if user %}
-                  <span class="welcome-message">Welcome, {{ user.first_name | capitalize }}.</span>
-                  <form onsubmit="activateLoadingScreen('reserve-pickup-button')" method="get" action="/reserve-calendar">
+                <form onsubmit="activateLoadingScreen('reserve-pickup-button')" method="post" action="/create-lobby">
                       <button id="reserve-pickup-button" class="reserve-pickup-button">
                           <span class="front">
-                            reserve pickup
+                            start battling
                           </span>
                       </button>
                   </form>
               {% else %}
-                  <span id="guest-welcome-message" class="welcome-message">Welcome. Sign up or log in to reserve a pickup.</span>
+                <div onclick="toggle_popup('signup-form-container')" >
+                      <button id="reserve-pickup-button" class="reserve-pickup-button" >
+                          <span class="front">
+                            start battling
+                          </span>
+                      </button>
+                </div>
               {% endif %}
           </div>
 
