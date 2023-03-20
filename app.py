@@ -1,17 +1,30 @@
-import random, string, os, pymysql
-from dotenv import load_dotenv, find_dotenv
+import bcrypt
+import random
+import secrets
+import smtplib
+import string
+import uuid
+import pymysql
+from datetime import datetime
+from email.message import EmailMessage
+from email.utils import formataddr
 from flask import Flask, render_template, redirect, request
-from flask_sqlalchemy import SQLAlchemy
-
-
-if not os.getenv("PUBLIC_ACTIVATED"):
-    assert load_dotenv(find_dotenv()), "Failed to load environment."
+from database import LeetArena
 
 pymysql.install_as_MySQLdb()
-db = SQLAlchemy()
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("CLEARDB_YELLOW_URL")
-db.init_app(app)
+
+
+def send_email(sender_name, recipient, subject, body):  #  TODO: UPDATE WITH NEW EMAIL
+    em = EmailMessage()
+    em["From"] = formataddr((sender_name, "athleats.wayland@gmail.com"))
+    em["To"] = recipient
+    em["Subject"] = subject
+    em.set_content(body)
+
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
+        smtp.login("athleats.wayland@gmail.com", "")
+        smtp.sendmail("athleats.wayland@gmail.com", recipient, em.as_string())
 
 
 @app.route("/lobby/<lobby_id>", methods=["GET"])
@@ -47,8 +60,73 @@ def display_home():
         "home.html",
         user=False,
         login_error=None,
-        signup_error=None,
+        signup_error=None
     )
+
+
+@app.route("/login", methods=["POST"])
+def login():
+    email = request.form["email"]
+    password = request.form["pass"]  # plain text password
+
+    database = LeetArena()
+    with database:
+        # login_user returns auth_token of user if email and password correct
+        auth_token = database.login_user(email, password)
+
+    if not auth_token:
+        return redirect("/?login_error=Email or password not found", 302)
+
+    response = redirect("/", 302)
+    # Create an auth browser cookie (random letters and numbers) as our authentication
+    # token so the user doesn't have to log in every single time.
+    response.set_cookie('auth_token', auth_token, max_age=60 * 60 * 24 * 365)  # One year expiration (in seconds)
+    return response
+
+
+@app.route("/signup", methods=["POST"])
+def signup():
+    # Collect POST request params from signup
+    email = request.form["email"]
+    username = request.form["username"]
+
+    # Hash password (hashing means that it is encrypted and impossible to decrypt)
+    # We can now only check to see if a plain text input matches the hashed password (bcrypt.checkpw).
+    hashed_password = bcrypt.hashpw(bytes(str(request.form["pass"]).encode("utf-8")), bcrypt.gensalt()).decode("utf-8")
+
+    auth_token = secrets.token_hex()
+
+    # Create timestamp of the creation date of the account
+    creation_date = int(datetime.timestamp(datetime.now()))
+
+    # Check if email is already in use (get_student returns list of user with that email).
+    database = LeetArena()
+    with database:
+        user = database.get_entry(table_name="user", email=email)
+
+        if user:
+            return redirect("/?signup_error=Email is already in use.")
+
+        # Add user to database
+        user = database.create_entry(
+            table_name="user",
+            entry_id=uuid.uuid4(),
+            email=email,
+            username=username,
+            hashed_password=hashed_password,
+            auth_token=auth_token,
+            creation_date=creation_date,
+            admin=0,
+        )
+
+    # Set auth cookie token
+    response = redirect("/", 302)
+
+    # Create an auth browser cookie (random letters and numbers) as our authentication
+    # token so the user doesn't have to log in every single time.
+    response.set_cookie('auth_token', auth_token, max_age=31540000)  # One year expiration (in seconds)
+
+    return response
 
 
 @app.route("/test", methods=["GET"])
@@ -66,8 +144,3 @@ if __name__ == '__main__':
 #  TODO: timed challenges
 #  TODO: different difficulty daily challenges
 
-
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String, unique=True, nullable=False)
-    email = db.Column(db.String)
