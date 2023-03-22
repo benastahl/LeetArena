@@ -27,28 +27,12 @@
                   <button onclick="toggle_popup('signup-form-container')" id="signup-button" class="access-button"> SIGNUP </button>
               </div>
             {% else %}
-              <div class="profile-details">
+
+              <div class="profile-button">
                 <i class="bx bx-user-circle guest-profile-picture"></i>
-                <span class="admin_name">{{user.first_name | capitalize}} {{user.last_name | capitalize }}</span>
+                <span class="username">{{user.username}}</span>
                 <i class='arrow bx bx-chevron-down' ></i>
-
               </div>
-              <div style="visibility: hidden" class="profile-dropdown">
-                      <ul>
-                          <li id="profile-selection" onclick="location.href = '/profile'" ><a href="/profile">Profile</a></li>
-                          <li onclick="document.location.href = document.location.origin + '/settings'" id="settings-selection">Settings</li>
-                          {% if user.staff %}
-                              <script>document.querySelector(".profile-dropdown").style.marginTop = "250px";</script>
-                              <li onclick="location.href = '/staff-dashboard'" ><a href="/staff-dashboard">Staff Dashboard</a></li>
-                          {% endif %}
-                          {% if user.admin %}
-                              <script>document.querySelector(".profile-dropdown").style.marginTop = "300px";</script>
-                              <li onclick="location.href = '/admin-dashboard'" ><a href="/admin-dashboard">Admin Dashboard</a></li>
-
-                          {% endif %}
-                          <li onclick="location.href = '/logout'" class="last-option"><a href="/logout">Logout</a></li>
-                      </ul>
-                </div>
 
             {% endif %}
 
@@ -112,7 +96,7 @@
 
           <div class="home-header">
               {% if user %}
-                <form onsubmit="activateLoadingScreen('reserve-pickup-button')" method="post" action="/create-lobby">
+                <form onsubmit="activateLoadingScreen('reserve-pickup-button')" method="post" action="/create-lobby ">
                       <button id="reserve-pickup-button" class="reserve-pickup-button">
                           <span class="front">
                             start battling

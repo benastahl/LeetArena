@@ -54,6 +54,7 @@ class LeetArena:
         self.log(f"Successfully connected to database '{sql_database}' ({self.connection_id}).", "s")
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        self.connection.commit()
         self.connection.close()
         self.database.dispose()
         self.log(f"Connection closed and database engine disposed. ({self.connection_id})", "p")

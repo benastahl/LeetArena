@@ -36,6 +36,7 @@ let show_profile_dropdown = function () {
 
 profile_button.onclick = function () {
   if (!profile_dropdown_activated) {
+        console.log("Shown")
         show_profile_dropdown()
   } else {
       hide_profile_dropdown()

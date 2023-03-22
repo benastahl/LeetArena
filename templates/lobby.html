@@ -15,6 +15,14 @@
   <link href="../static/styles/loading.css" rel="stylesheet">
   <div class="loading-overlay"></div>
   <script src="../static/scripts/loading.js" ></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+    <script type="text/javascript" charset="utf-8">
+        var socket = io();
+        socket.on('connect', function() {
+            console.log("User connected.")
+            socket.emit('user-connection-lobby', {lobby_id: "{{lobby_id}}", user_id: "{{user.entry_id}}"});
+        });
+    </script>
 
   <body>
     <section>
@@ -53,6 +61,7 @@
 
         <form class="lobby-section" method="post" id="start-game" action="/start-game">
             <div class="lobby-container">
+                {% if admin %}
                 <div class="controls">
                     <h2 class="controls-main-header">Lobby Controls</h2>
                     <h3 class="control-header">Game Mode</h3>
@@ -78,6 +87,7 @@
                         <input type="hidden" id="game-language-select" name="game-language" value="PYTHON3">
                     </div>
                 </div>
+                {% endif %}
                 <div class="lobby">
                     <h2 class="controls-main-header">Lobby (2 players)</h2>
                     <div class="player-container">

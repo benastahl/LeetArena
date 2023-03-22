@@ -9,59 +9,98 @@ from datetime import datetime
 from email.message import EmailMessage
 from email.utils import formataddr
 from flask import Flask, render_template, redirect, request
+from flask_socketio import SocketIO, emit, join_room
 from database import LeetArena
 
 pymysql.install_as_MySQLdb()
 app = Flask(__name__)
+socketio = SocketIO(app)
+socketio.init_app(app, cors_allowed_origins="*")
 
+lobbies = {}
 
-def send_email(sender_name, recipient, subject, body):  #  TODO: UPDATE WITH NEW EMAIL
-    em = EmailMessage()
-    em["From"] = formataddr((sender_name, "athleats.wayland@gmail.com"))
-    em["To"] = recipient
-    em["Subject"] = subject
-    em.set_content(body)
-
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
-        smtp.login("athleats.wayland@gmail.com", "")
-        smtp.sendmail("athleats.wayland@gmail.com", recipient, em.as_string())
-
-
-@app.route("/lobby/<lobby_id>", methods=["GET"])
-def display_lobby():
-    return render_template("lobby.html",
-                           user=False
-                           )
-
-
-@app.route("/create-lobby", methods=["POST"])
-def create_lobby():
-    join_code_length = 7
-    join_code = ''.join(random.choices(string.ascii_uppercase +
-                                       string.digits, k=join_code_length))
-    return redirect(f"/lobby/{join_code}")
-
-
-@app.route("/start-game", methods=["POST"])
-def start_game():
-    return redirect("/lobby")
-
-
-@app.route("/duel", methods=["GET"])
-def display_duel():
-    return render_template("duel.html",
-                           user=False,
-                           )
+# Base
 
 
 @app.route("/", methods=["GET"])
 def display_home():
+    auth_token = request.cookies.get("auth_token")
+    db = LeetArena()
+    with db:
+        user = db.get_entry("user", auth_token=auth_token)
+
     return render_template(
         "home.html",
-        user=False,
+        user=user,
         login_error=None,
         signup_error=None
     )
+
+
+# Game
+
+@app.route("/game/<lobby_id>", methods=["GET"])
+def display_game(lobby_id):
+    auth_token = request.cookies.get("auth_token")
+    db = LeetArena()
+    with db:
+        user = db.get_entry("user", auth_token=auth_token)
+
+    if not user or lobby_id not in lobbies:  # No user found or game not found
+        return redirect("/")
+
+    game = lobbies[lobby_id]
+
+    return render_template(
+        "lobby.html",
+        user=user,
+        game=game,
+        admin=user.entry_id == game["admin"],
+        lobby_id=lobby_id
+    )
+
+
+@app.route("/create-lobby", methods=["POST"])  # Creates lobby and redirects to that lobby.
+def create_lobby():
+    auth_token = request.cookies.get("auth_token")
+
+    db = LeetArena()
+    with db:
+        user = db.get_entry("user", auth_token=auth_token)
+
+    if not user:
+        return redirect("/")
+
+    # Create a lobby with join code
+    join_code_length = 7
+    join_code = ''.join(random.choices(string.ascii_uppercase +
+                                       string.digits, k=join_code_length))
+
+    # Create game
+    lobbies[join_code] = {
+        "started": False,
+        "game_mode": None,
+        "difficulty": None,
+        "language": None,
+        "admin": user.entry_id,
+        "players": [user.entry_id],
+    }
+
+    return redirect(f"/game/{join_code}")
+
+
+# Game Events
+
+@socketio.on("user-connection-lobby")
+def user_connected(data):
+    id_lobby = data["lobby_id"]
+    id_user = data["user_id"]
+    print(f"{id_user} has connected to the lobby: {id_lobby}")
+    lobbies[id_lobby]["players"].append(id_user)
+    print(lobbies[id_lobby])
+
+
+# Authentication
 
 
 @app.route("/login", methods=["POST"])
@@ -129,18 +168,5 @@ def signup():
     return response
 
 
-@app.route("/test", methods=["GET"])
-def display_test():
-    return render_template(
-        "test.html",
-        user=False
-    )
-
-
 if __name__ == '__main__':
-    app.run(port=5555, debug=True)
-
-#  TODO: friend system
-#  TODO: timed challenges
-#  TODO: different difficulty daily challenges
-
+    socketio.run(app, debug=True, port=5555, allow_unsafe_werkzeug=True)

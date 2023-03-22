@@ -36,71 +36,26 @@ section nav .navbar-logo {
 }
 
 /* * PROFILE * */
-section nav .profile-details{
+.profile-button {
   display: flex;
+  flex-direction: row;
   align-items: center;
-  background: #EC625F;
-  border: 2px solid #313131;
-  border-radius: 25px;
-  height: 50px;
-  min-width: 190px;
-  padding: 0 10px 0 2px;
-  user-select: none;
-  cursor: pointer;
-}
-section nav .profile-dropdown{
-  position: absolute;
-  right: 0;
-  margin-top: 200px;
-  margin-right: 20px;
-}
-section nav .profile-dropdown ul li {
-  display: flex;
-  align-items: center;
-  background: #F5F6FA;
-  border-radius: 0;
-  border-top: 2px solid black;
-  border-right: 2px solid black;
-  border-left: 2px solid black;
-  height: 50px;
-  padding: 15px;
-  font-weight: bold;
-  user-select: none;
-  justify-content: center;
-  cursor: pointer;
-}
-section nav .profile-dropdown ul li a {
-  text-decoration: none;
-  color: black;
-}
-section nav .profile-dropdown ul .last-option {
-  border-radius: 0 0 25px 25px;
-  border-bottom: 2px solid black;
-  border-left: 2px solid black;
-  border-right: 2px solid black;
-}
+  justify-content: space-between;
 
-nav .profile-details img{
-  height: 40px;
-  width: 40px;
-  border-radius: 6px;
-  object-fit: cover;
+  height: 50px;
+  padding: 10px 5px;
+  border-radius: 25px;
+
+  border: 2px solid black;
+  background: #EC625F;
+
+  cursor: pointer;
+
 }
-nav .profile-details .guest-profile-picture {
-  height: 40px;
-  width: 40px;
-  font-size: 40px;
-  border-radius: 6px;
-  object-fit: cover;
+.profile-button .bx {
+  margin-right: 10px;
+  font-size: 35px;
 }
-nav .profile-details .admin_name{
-  font-size: 15px;
+.profile-button .username {
   font-weight: 500;
-  color: #333;
-  margin: 0 10px;
-  white-space: nowrap;
-}
-nav .profile-details i{
-  font-size: 25px;
-  color: #313131;
 }
