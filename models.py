@@ -15,6 +15,18 @@ class User:
         self.admin = bool(admin)
 
 
+class Lobby:
+    def __init__(self, entry_id, started, game_mode, difficulty, language, admin, players):
+        self.entry_id = entry_id
+
+        self.started = started
+        self.game_mode = game_mode
+        self.difficulty = difficulty
+        self.language = language
+        self.admin = admin
+        self.players = players
+
+
 # Experimental
 class Statistics:
     def __init__(self,

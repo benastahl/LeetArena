@@ -4,6 +4,7 @@ import secrets
 import smtplib
 import string
 import uuid
+import json
 import pymysql
 from datetime import datetime
 from email.message import EmailMessage
@@ -16,8 +17,6 @@ pymysql.install_as_MySQLdb()
 app = Flask(__name__)
 socketio = SocketIO(app)
 socketio.init_app(app, cors_allowed_origins="*")
-
-lobbies = {}
 
 # Base
 
@@ -45,17 +44,16 @@ def display_game(lobby_id):
     db = LeetArena()
     with db:
         user = db.get_entry("user", auth_token=auth_token)
+        lobby = db.get_entry("lobby", lobby_id=lobby_id)
 
-    if not user or lobby_id not in lobbies:  # No user found or game not found
+    if not user:  # No user found or game not found
         return redirect("/")
-
-    game = lobbies[lobby_id]
 
     return render_template(
         "lobby.html",
         user=user,
-        game=game,
-        admin=user.entry_id == game["admin"],
+        game=lobby,
+        admin=user.entry_id == lobby.admin,
         lobby_id=lobby_id
     )
 
@@ -68,23 +66,25 @@ def create_lobby():
     with db:
         user = db.get_entry("user", auth_token=auth_token)
 
-    if not user:
-        return redirect("/")
+        if not user:
+            return redirect("/")
 
-    # Create a lobby with join code
-    join_code_length = 7
-    join_code = ''.join(random.choices(string.ascii_uppercase +
-                                       string.digits, k=join_code_length))
+        # Create a lobby with join code
+        join_code_length = 7
+        join_code = ''.join(random.choices(string.ascii_uppercase +
+                                           string.digits, k=join_code_length))
 
-    # Create game
-    lobbies[join_code] = {
-        "started": False,
-        "game_mode": None,
-        "difficulty": None,
-        "language": None,
-        "admin": user.entry_id,
-        "players": [user.entry_id],
-    }
+        lobby = db.create_entry(
+            table_name="lobby",
+            entry_id=uuid.uuid4(),
+            lobby_id=join_code,
+            started=0,
+            game_mode="",
+            difficulty="",
+            language="",
+            admin=user.entry_id,
+            players=user.entry_id
+        )
 
     return redirect(f"/game/{join_code}")
 
@@ -96,8 +96,10 @@ def user_connected(data):
     id_lobby = data["lobby_id"]
     id_user = data["user_id"]
     print(f"{id_user} has connected to the lobby: {id_lobby}")
-    lobbies[id_lobby]["players"].append(id_user)
-    print(lobbies[id_lobby])
+
+    if id_user not in lobbies[id_lobby]["players"]:
+        lobbies[id_lobby]["players"].append(id_user)
+        emit("update-lobby", lobbies[id_lobby])
 
 
 # Authentication

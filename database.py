@@ -9,7 +9,7 @@ from sqlalchemy import text
 
 from datetime import datetime
 from termcolor import colored
-from models import User
+from models import User, Lobby
 
 if not os.getenv("PUBLIC_ACTIVATED"):
     assert load_dotenv(find_dotenv()), "Failed to load environment."
@@ -18,8 +18,6 @@ sql_host = os.getenv("SQL_HOST")
 sql_username = os.getenv("SQL_USERNAME")
 sql_password = os.getenv("SQL_PASSWORD")
 sql_database = os.getenv("SQL_DATABASE")
-
-google_app_password = os.getenv("GOOGLE_APP_PASSWORD")
 
 # dialect+driver://username:password@host:port/database
 
@@ -35,6 +33,19 @@ tables = {
             "admin:INT",
         ],
         "instance": User
+    },
+    "lobby": {
+        "attributes": [
+            "entry_id:TEXT",
+            "lobby_id:TEXT",
+            "started:INT",
+            "game_mode:TEXT",
+            "difficulty:TEXT",
+            "language:TEXT",
+            "admin:TEXT",
+            "players:TEXT",
+        ],
+        "instance": Lobby
     },
 }
 
@@ -80,7 +91,7 @@ class LeetArena:
         print(
             colored(
                 f"[{datetime.now().strftime('%m-%d-%Y %H:%M:%S')}] - "
-                f"[ATHLEATS: {self.table_name.upper()}] - "
+                f"[LEETARENA: {self.table_name.upper()}] - "
                 f"{text}",
                 color_schemes.get(status)
             )
@@ -141,8 +152,8 @@ class LeetArena:
         conditions = ", ".join([f"{kwarg} = {self.sql_conv(kwargs[kwarg])}" for kwarg in kwargs])
         self.connection.execute(
             text(f"UPDATE {table_name} "
-            f"SET {conditions} "
-            f"WHERE entry_id = '{entry_id}'")
+                 f"SET {conditions} "
+                 f"WHERE entry_id = '{entry_id}'")
         )
 
         entries = self.connection.execute(text(f"SELECT * FROM {table_name} WHERE entry_id = '{entry_id}'")).fetchall()
@@ -154,7 +165,7 @@ class LeetArena:
         self.set_table(table_name)
         self.connection.execute(
             text(f"DELETE FROM {table_name} "
-            f"WHERE entry_id = '{entry_id}'")
+                 f"WHERE entry_id = '{entry_id}'")
         )
         self.log(f"Deleted entry: {entry_id}.", "p")
 
