@@ -1,25 +1,47 @@
+import os
+
 import bcrypt
 import random
 import secrets
-import smtplib
 import string
 import uuid
-import json
 import pymysql
+import pymongo
 from datetime import datetime
-from email.message import EmailMessage
-from email.utils import formataddr
-from flask import Flask, render_template, redirect, request
-from flask_socketio import SocketIO, emit, join_room
+from flask import Flask, render_template, redirect, request, session, abort, g
+from flask_socketio import SocketIO, emit, join_room, rooms, close_room, leave_room
 from database import LeetArena
 
 pymysql.install_as_MySQLdb()
 app = Flask(__name__)
 socketio = SocketIO(app)
+app.config["SECRET_KEY"] = secrets.token_hex()
 socketio.init_app(app, cors_allowed_origins="*")
+pymongo.MongoClient(
+
+)
+
+
+class Room(mongoengine.Document):
+    room_code = mongoengine.StringField()
+    started = mongoengine.IntField()
+    game_mode = mongoengine.IntField()
+    difficulty = mongoengine.IntField()
+    language = mongoengine.IntField()
+    admin = mongoengine.StringField()
+    players = mongoengine.ListField(mongoengine.StringField())
+
+    def to_json(self):
+        return {"room_code": self.room_code,
+                "started": self.started,
+                "game_mode": self.game_mode,
+                "difficulty": self.difficulty,
+                "language": self.language,
+                "admin": self.started,
+                "players": self.players}
+
 
 # Base
-
 
 @app.route("/", methods=["GET"])
 def display_home():
@@ -38,23 +60,24 @@ def display_home():
 
 # Game
 
-@app.route("/game/<lobby_id>", methods=["GET"])
-def display_game(lobby_id):
+@app.route("/game/<room_code>", methods=["GET"])
+def display_game(room_code):
     auth_token = request.cookies.get("auth_token")
     db = LeetArena()
     with db:
         user = db.get_entry("user", auth_token=auth_token)
-        lobby = db.get_entry("lobby", lobby_id=lobby_id)
 
     if not user:  # No user found or game not found
         return redirect("/")
 
+    room = Room.objects(room_code=room_code).first()
+
     return render_template(
         "lobby.html",
         user=user,
-        game=lobby,
-        admin=user.entry_id == lobby.admin,
-        lobby_id=lobby_id
+        room=room,
+        admin=room.admin == user.entry_id,
+        room_code=room_code,
     )
 
 
@@ -66,40 +89,46 @@ def create_lobby():
     with db:
         user = db.get_entry("user", auth_token=auth_token)
 
-        if not user:
-            return redirect("/")
+    if not user:
+        return redirect("/")
 
-        # Create a lobby with join code
-        join_code_length = 7
-        join_code = ''.join(random.choices(string.ascii_uppercase +
-                                           string.digits, k=join_code_length))
+    # Create a lobby with join code
+    room_code_length = 7
+    room_code = ''.join(random.choices(string.ascii_uppercase +
+                                       string.digits, k=room_code_length))
 
-        lobby = db.create_entry(
-            table_name="lobby",
-            entry_id=uuid.uuid4(),
-            lobby_id=join_code,
-            started=0,
-            game_mode="",
-            difficulty="",
-            language="",
-            admin=user.entry_id,
-            players=user.entry_id
-        )
+    print("Creating room...")
+    room = Room(
+        room_code=room_code,
+        started=0,
+        game_mode=0,
+        difficulty=0,
+        language=0,
+        admin=user.entry_id,
+        players=[user.entry_id]
+    )
+    room.save()
+    print("Created room.")
+    room = Room.objects(room_code=room_code).first()
+    print(room.players)
 
-    return redirect(f"/game/{join_code}")
+    return redirect(f"/game/{room_code}")
 
 
 # Game Events
 
 @socketio.on("user-connection-lobby")
 def user_connected(data):
-    id_lobby = data["lobby_id"]
+    id_room = data["lobby_id"]
     id_user = data["user_id"]
-    print(f"{id_user} has connected to the lobby: {id_lobby}")
+    print(f"{id_user} has connected to the lobby: {id_room}")
+    join_room(room=id_room)
+    room = Room.objects(room_code=id_room).first()
 
-    if id_user not in lobbies[id_lobby]["players"]:
-        lobbies[id_lobby]["players"].append(id_user)
-        emit("update-lobby", lobbies[id_lobby])
+    if id_user not in room.players:
+        room.update(players=room.players.append(id_user))
+        print("New player:", room.players)
+        emit("update-lobby", data=session[id_room], to=id_room)
 
 
 # Authentication

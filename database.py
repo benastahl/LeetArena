@@ -34,19 +34,6 @@ tables = {
         ],
         "instance": User
     },
-    "lobby": {
-        "attributes": [
-            "entry_id:TEXT",
-            "lobby_id:TEXT",
-            "started:INT",
-            "game_mode:TEXT",
-            "difficulty:TEXT",
-            "language:TEXT",
-            "admin:TEXT",
-            "players:TEXT",
-        ],
-        "instance": Lobby
-    },
 }
 
 

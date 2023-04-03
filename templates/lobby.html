@@ -20,8 +20,9 @@
         var socket = io();
         socket.on('connect', function() {
             console.log("User connected.");
-            socket.emit('user-connection-lobby', {lobby_id: "{{lobby_id}}", user_id: "{{user.entry_id}}"});
+            socket.emit('user-connection-lobby', {room_code: "{{room_code}}", user_id: "{{user.entry_id}}"});
         });
+
         socket.on("update-lobby", function(data) {
             console.log("Updating lobby...")
             console.log("New players: " + data.players)
