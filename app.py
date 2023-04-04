@@ -5,9 +5,11 @@ import random
 import secrets
 import string
 import uuid
+import certifi
 import pymysql
 import mongoengine
 from datetime import datetime
+from dotenv import load_dotenv, find_dotenv
 from flask import Flask, render_template, redirect, request, session, abort
 from flask_socketio import SocketIO, emit, rooms, join_room, close_room, leave_room
 
@@ -16,9 +18,15 @@ app = Flask(__name__)
 socketio = SocketIO(app)
 app.config["SECRET_KEY"] = secrets.token_hex()
 socketio.init_app(app, cors_allowed_origins="*")
-mongoengine.connect(
-    host=os.getenv("MONGO_DB")
+if not os.getenv("PUBLIC_ACTIVATED"):
+    assert load_dotenv(find_dotenv()), "Failed to load environment."
+print(os.getenv("MONGO_DB"))
+db_url = os.getenv("MONGO_DB")
+db = mongoengine.connect(
+    host=db_url,
+    tlsCAFile=certifi.where()
 )
+print(db.list_database_names())
 
 
 class Rooms(mongoengine.Document):
@@ -67,9 +75,11 @@ def display_game(room_code):
         return redirect("/")
 
     room = Rooms.objects(room_code=room_code).first()
+
     print(room.players)
     return render_template(
         "lobby.html",
+        players=room.players,
         user=user,
         room=room,
         admin=room.admin == user.username,
@@ -92,7 +102,6 @@ def create_lobby():
                                        string.digits, k=room_code_length))
 
     print("Creating room...")
-    join_room(room=room_code)
     Rooms(
         room_code=room_code,
         started=0,
@@ -124,10 +133,33 @@ def user_connected(data):
     # New user connected
     if username not in room.players:
         print(rooms())
-        room.update(players=room.players.append(username)).save()
-        emit("lobby-update", {"players": room.players}, room=room_code)
+        l_new_players = room.players.append(username)
+        room.update(players=l_new_players)
 
-# TODO: user disconnect
+        user = Users.objects(username=username).first()
+        pfp = "https://c4.wallpaperflare.com/wallpaper/273/268/863/appa-avatar-the-last-airbender-glasses-wallpaper-thumb.jpg"
+        emit("lobby-update", {
+            "username": username,
+            "pfp": pfp,
+            "level": "13",
+            "admin": user.username == room.admin,
+
+        }, room=room_code)
+
+
+@socketio.on("lobby-user-disconnected")
+def user_disconnected(data):
+    room_code = data["room_code"]
+    username = data["username"]
+    print(f"{username} has disconnected from the lobby: {room_code}")
+
+    # Room data
+    room = Rooms.objects(room_code=room_code).first()
+    leave_room(room=room_code)
+    print(room.players)
+    room.update(players=room.players.remove(username))
+    emit("lobby-update", {"players": room.players}, room=room_code)
+
 
 # Authentication
 
