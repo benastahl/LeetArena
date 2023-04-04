@@ -6,23 +6,22 @@ import secrets
 import string
 import uuid
 import pymysql
-import pymongo
+import mongoengine
 from datetime import datetime
-from flask import Flask, render_template, redirect, request, session, abort, g
-from flask_socketio import SocketIO, emit, join_room, rooms, close_room, leave_room
-from database import LeetArena
+from flask import Flask, render_template, redirect, request, session, abort
+from flask_socketio import SocketIO, emit, rooms, join_room, close_room, leave_room
 
 pymysql.install_as_MySQLdb()
 app = Flask(__name__)
 socketio = SocketIO(app)
 app.config["SECRET_KEY"] = secrets.token_hex()
 socketio.init_app(app, cors_allowed_origins="*")
-pymongo.MongoClient(
-
+mongoengine.connect(
+    host=os.getenv("MONGO_DB")
 )
 
 
-class Room(mongoengine.Document):
+class Rooms(mongoengine.Document):
     room_code = mongoengine.StringField()
     started = mongoengine.IntField()
     game_mode = mongoengine.IntField()
@@ -31,14 +30,13 @@ class Room(mongoengine.Document):
     admin = mongoengine.StringField()
     players = mongoengine.ListField(mongoengine.StringField())
 
-    def to_json(self):
-        return {"room_code": self.room_code,
-                "started": self.started,
-                "game_mode": self.game_mode,
-                "difficulty": self.difficulty,
-                "language": self.language,
-                "admin": self.started,
-                "players": self.players}
+
+class Users(mongoengine.Document):
+    email = mongoengine.StringField()
+    username = mongoengine.StringField()
+    hashed_password = mongoengine.StringField()
+    auth_token = mongoengine.StringField()
+    admin = mongoengine.IntField()
 
 
 # Base
@@ -46,9 +44,8 @@ class Room(mongoengine.Document):
 @app.route("/", methods=["GET"])
 def display_home():
     auth_token = request.cookies.get("auth_token")
-    db = LeetArena()
-    with db:
-        user = db.get_entry("user", auth_token=auth_token)
+
+    user = Users.objects(auth_token=auth_token).first()
 
     return render_template(
         "home.html",
@@ -63,20 +60,19 @@ def display_home():
 @app.route("/game/<room_code>", methods=["GET"])
 def display_game(room_code):
     auth_token = request.cookies.get("auth_token")
-    db = LeetArena()
-    with db:
-        user = db.get_entry("user", auth_token=auth_token)
+
+    user = Users.objects(auth_token=auth_token).first()
 
     if not user:  # No user found or game not found
         return redirect("/")
 
-    room = Room.objects(room_code=room_code).first()
-
+    room = Rooms.objects(room_code=room_code).first()
+    print(room.players)
     return render_template(
         "lobby.html",
         user=user,
         room=room,
-        admin=room.admin == user.entry_id,
+        admin=room.admin == user.username,
         room_code=room_code,
     )
 
@@ -85,9 +81,7 @@ def display_game(room_code):
 def create_lobby():
     auth_token = request.cookies.get("auth_token")
 
-    db = LeetArena()
-    with db:
-        user = db.get_entry("user", auth_token=auth_token)
+    user = Users.objects(auth_token=auth_token).first()
 
     if not user:
         return redirect("/")
@@ -98,18 +92,18 @@ def create_lobby():
                                        string.digits, k=room_code_length))
 
     print("Creating room...")
-    room = Room(
+    join_room(room=room_code)
+    Rooms(
         room_code=room_code,
         started=0,
         game_mode=0,
         difficulty=0,
         language=0,
-        admin=user.entry_id,
-        players=[user.entry_id]
-    )
-    room.save()
+        admin=user.username,
+        players=[user.username]
+    ).save()
     print("Created room.")
-    room = Room.objects(room_code=room_code).first()
+    room = Rooms.objects(room_code=room_code).first()
     print(room.players)
 
     return redirect(f"/game/{room_code}")
@@ -117,19 +111,23 @@ def create_lobby():
 
 # Game Events
 
-@socketio.on("user-connection-lobby")
+@socketio.on("lobby-user-connected")
 def user_connected(data):
-    id_room = data["lobby_id"]
-    id_user = data["user_id"]
-    print(f"{id_user} has connected to the lobby: {id_room}")
-    join_room(room=id_room)
-    room = Room.objects(room_code=id_room).first()
+    room_code = data["room_code"]
+    username = data["username"]
+    print(f"{username} has connected to the lobby: {room_code}")
 
-    if id_user not in room.players:
-        room.update(players=room.players.append(id_user))
-        print("New player:", room.players)
-        emit("update-lobby", data=session[id_room], to=id_room)
+    # Room data
+    room = Rooms.objects(room_code=room_code).first()
+    join_room(room=room_code)
 
+    # New user connected
+    if username not in room.players:
+        print(rooms())
+        room.update(players=room.players.append(username)).save()
+        emit("lobby-update", {"players": room.players}, room=room_code)
+
+# TODO: user disconnect
 
 # Authentication
 
@@ -139,18 +137,27 @@ def login():
     email = request.form["email"]
     password = request.form["pass"]  # plain text password
 
-    database = LeetArena()
-    with database:
-        # login_user returns auth_token of user if email and password correct
-        auth_token = database.login_user(email, password)
+    user = Users.objects(email=email).first()
+    if not user:
+        return render_template(
+            "home.html",
+            login_error="Email not found.",
+        )
 
-    if not auth_token:
-        return redirect("/?login_error=Email or password not found", 302)
+    correct_pw = bcrypt.checkpw(bytes(password.encode("utf-8")), user.hashed_password.encode("utf-8"))
+    if not correct_pw:
+        return render_template(
+            "home.html",
+            login_error="Incorrect password.",
+        )
 
+    auth_token = secrets.token_hex()
     response = redirect("/", 302)
     # Create an auth browser cookie (random letters and numbers) as our authentication
     # token so the user doesn't have to log in every single time.
     response.set_cookie('auth_token', auth_token, max_age=60 * 60 * 24 * 365)  # One year expiration (in seconds)
+    user.update(auth_token=auth_token)
+
     return response
 
 
@@ -160,34 +167,27 @@ def signup():
     email = request.form["email"]
     username = request.form["username"]
 
+    # Check if email or username is already in use.
+    if Users.objects(email=email).first() or Users.objects(username=username).first():
+        render_template(
+            "home.html",
+            signup_error="Email already in use.",
+        )
+
     # Hash password (hashing means that it is encrypted and impossible to decrypt)
     # We can now only check to see if a plain text input matches the hashed password (bcrypt.checkpw).
     hashed_password = bcrypt.hashpw(bytes(str(request.form["pass"]).encode("utf-8")), bcrypt.gensalt()).decode("utf-8")
 
     auth_token = secrets.token_hex()
 
-    # Create timestamp of the creation date of the account
-    creation_date = int(datetime.timestamp(datetime.now()))
-
-    # Check if email is already in use (get_student returns list of user with that email).
-    database = LeetArena()
-    with database:
-        user = database.get_entry(table_name="user", email=email)
-
-        if user:
-            return redirect("/?signup_error=Email is already in use.")
-
-        # Add user to database
-        user = database.create_entry(
-            table_name="user",
-            entry_id=uuid.uuid4(),
-            email=email,
-            username=username,
-            hashed_password=hashed_password,
-            auth_token=auth_token,
-            creation_date=creation_date,
-            admin=0,
-        )
+    # Create user.
+    Users(
+        email=email,
+        username=username,
+        hashed_password=hashed_password,
+        auth_token=auth_token,
+        admin=0,
+    ).save()
 
     # Set auth cookie token
     response = redirect("/", 302)
