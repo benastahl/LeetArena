@@ -46,9 +46,7 @@ let create_user_card = function (username, pfp_src, level, admin) {
     } else {
         icon_role.className = "bx bxs-user-rectangle player-role"
     }
-
-    // Construction
-
+    div_player_card_container.appendChild(icon_role);
 
 
 }

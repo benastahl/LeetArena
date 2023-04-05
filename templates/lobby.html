@@ -9,6 +9,12 @@
       <link rel="icon" href="../static/images/coding-arena-logo.png">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title> Lobby - CodeArena </title>
+      <script>
+          window.addEventListener("beforeunload", function (ev) {
+            console.log("User has disconnected!");
+            socket.emit('disconnected', {room_code: "{{ room_code }}", username: "{{ user.username }}"});
+        })
+      </script>
    </head>
 
   <!-- Loading Activation -->
@@ -19,22 +25,18 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
     <script type="text/javascript" charset="utf-8">
         var socket = io();
-        socket.on('connect', function() {
-            console.log("User connected.");
-            socket.emit('lobby-user-connected', {room_code: "{{room_code}}", username: "{{user.username}}"});
+
+        socket.on("connect", function () {
+            console.log("Client connected.")
+            socket.emit("join", {"username": "{{user.username}}", "room": "{{room_code}}"})
         });
 
-        socket.on("lobby-update", function(player) {
-            console.log("Updating lobby...")
-            console.log("New player: " + player)
-            console.log("Updating player list...")
+        socket.on("user-joined", function (player) {
+            console.log(player.username, "joined the game.")
             create_user_card(player.username, player.pfp, player.level, player.admin)
         });
 
-        window.onbeforeunload = function () {
-            console.log("User has disconnected!")
-            socket.emit("lobby-user-disconnected", {room_code: "{{ room_code }}", username: "{{ user.username }}"})
-        };
+
     </script>
 
   <body>
@@ -69,7 +71,7 @@
       </nav>
 
         <div class="content">
-          <h1>benastahl, welcome to the lobby!</h1>
+          <h1>{{user.username}}, welcome to the lobby!</h1>
 
         <form class="lobby-section" method="post" id="start-game" action="/start-game">
             <div class="lobby-container">
@@ -103,6 +105,24 @@
                 <div class="lobby">
                     <h2 class="controls-main-header">Lobby (2 players)</h2>
                     <div class="player-container">
+                        {% for player in players %}
+                        <div class="player-card-container">
+                            <div class="player-card">
+                                <div class="left side">
+                                    <img src="https://c4.wallpaperflare.com/wallpaper/273/268/863/appa-avatar-the-last-airbender-glasses-wallpaper-thumb.jpg" class="player-picture" alt="benastahl pfp">
+                                    <div class="player-name">{{player}}</div>
+                                </div>
+                                <div class="right side">
+                                    <div class="player-level">13</div>
+                                </div>
+                            </div>
+                            {% if player == room.admin %}
+                                <i class='bx bxs-user-badge player-role'></i>
+                            {% else %}
+                                <i class='bx bxs-user-rectangle player-role'></i>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
                     </div>
                 </div>
             </div>

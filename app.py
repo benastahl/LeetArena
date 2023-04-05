@@ -1,5 +1,4 @@
 import os
-
 import bcrypt
 import random
 import secrets
@@ -8,25 +7,32 @@ import uuid
 import certifi
 import pymysql
 import mongoengine
+import logging
 from datetime import datetime
 from dotenv import load_dotenv, find_dotenv
-from flask import Flask, render_template, redirect, request, session, abort
+from flask import Flask, render_template, redirect, request, session, abort, make_response
 from flask_socketio import SocketIO, emit, rooms, join_room, close_room, leave_room
+from flask_session import Session
+
+logging.getLogger('socketio').setLevel(logging.CRITICAL)
+logging.getLogger('werkzeug').setLevel(logging.ERROR)
+logging.getLogger('engineio').setLevel(logging.CRITICAL)
 
 pymysql.install_as_MySQLdb()
 app = Flask(__name__)
 socketio = SocketIO(app)
 app.config["SECRET_KEY"] = secrets.token_hex()
+app.config["SESSION_TYPE"] = "filesystem"
+Session(app)
 socketio.init_app(app, cors_allowed_origins="*")
 if not os.getenv("PUBLIC_ACTIVATED"):
     assert load_dotenv(find_dotenv()), "Failed to load environment."
-print(os.getenv("MONGO_DB"))
+
 db_url = os.getenv("MONGO_DB")
 db = mongoengine.connect(
     host=db_url,
     tlsCAFile=certifi.where()
 )
-print(db.list_database_names())
 
 
 class Rooms(mongoengine.Document):
@@ -67,6 +73,7 @@ def display_home():
 
 @app.route("/game/<room_code>", methods=["GET"])
 def display_game(room_code):
+    print("Loading game...")
     auth_token = request.cookies.get("auth_token")
 
     user = Users.objects(auth_token=auth_token).first()
@@ -76,15 +83,15 @@ def display_game(room_code):
 
     room = Rooms.objects(room_code=room_code).first()
 
-    print(room.players)
-    return render_template(
+    response = make_response(render_template(
         "lobby.html",
         players=room.players,
         user=user,
         room=room,
         admin=room.admin == user.username,
         room_code=room_code,
-    )
+    ))
+    return response
 
 
 @app.route("/create-lobby", methods=["POST"])  # Creates lobby and redirects to that lobby.
@@ -109,56 +116,42 @@ def create_lobby():
         difficulty=0,
         language=0,
         admin=user.username,
-        players=[user.username]
+        players=[]
     ).save()
     print("Created room.")
     room = Rooms.objects(room_code=room_code).first()
-    print(room.players)
 
     return redirect(f"/game/{room_code}")
 
 
 # Game Events
 
-@socketio.on("lobby-user-connected")
-def user_connected(data):
-    room_code = data["room_code"]
-    username = data["username"]
-    print(f"{username} has connected to the lobby: {room_code}")
+@socketio.on("join")
+def user_joined(data):
+    username = data['username']
+    room_code = data['room']
+    print(f"{username} has joined the game ({room_code}).")
 
-    # Room data
     room = Rooms.objects(room_code=room_code).first()
-    join_room(room=room_code)
 
-    # New user connected
     if username not in room.players:
-        print(rooms())
-        l_new_players = room.players.append(username)
-        room.update(players=l_new_players)
-
-        user = Users.objects(username=username).first()
-        pfp = "https://c4.wallpaperflare.com/wallpaper/273/268/863/appa-avatar-the-last-airbender-glasses-wallpaper-thumb.jpg"
-        emit("lobby-update", {
-            "username": username,
-            "pfp": pfp,
-            "level": "13",
-            "admin": user.username == room.admin,
-
-        }, room=room_code)
-
-
-@socketio.on("lobby-user-disconnected")
-def user_disconnected(data):
-    room_code = data["room_code"]
-    username = data["username"]
-    print(f"{username} has disconnected from the lobby: {room_code}")
-
-    # Room data
-    room = Rooms.objects(room_code=room_code).first()
-    leave_room(room=room_code)
-    print(room.players)
-    room.update(players=room.players.remove(username))
-    emit("lobby-update", {"players": room.players}, room=room_code)
+        print(f"New Lobby Connection\n"
+              f"----------------------\n"
+              f"User: {username}\n"
+              f"Room: {room_code}\n"
+              f"Players: {room.players}\n"
+              f"")
+        room.players.append(username)
+        room.update(players=room.players)
+        room.save()
+        join_room(room=room_code)
+        emit("user-joined", {
+                "username": username,
+                "pfp": "https://c4.wallpaperflare.com/wallpaper/553/304/895/avatar-the-last-airbender-appa-glasses-wallpaper-preview.jpg",
+                "level": "13",
+                "admin": room.admin == username,
+            },
+            room=room_code)
 
 
 # Authentication
