@@ -1,0 +1,221 @@
+
+body {
+    background-image: url("../images/code-arena-background-roman.jpeg");
+    background-size: 1780px;
+    font-family: 'Poppins', sans-serif;
+}
+.lobby-section {
+    display: flex;
+    flex-direction: column;
+    padding: 120px 30px 10px 30px;
+
+}
+.lobby-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+.content h1 {
+    position: relative;
+    display: block;
+    top: 110px;
+    text-align: center;
+    margin: auto auto 10px auto;
+    padding: 5px 10px;
+
+    width: fit-content;
+
+    border-radius: 10px;
+    font-size: 30px;
+    color: #f4f4f4;
+    background: rgba(236, 98, 95, 0.63);
+
+}
+.controls, .lobby {
+    display: flex;
+    flex-direction: column;
+    /*margin: auto;*/
+
+    width: 40%;
+    border-radius: 10px;
+    padding: 20px;
+
+    box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);;
+    background: rgba(82, 82, 82, 0.78);
+}
+.controls-main-header {
+    color: #f4f4f4;
+    font-size: 30px;
+    border-bottom: 1px solid #313131;
+}
+.control-header {
+
+    margin-top: 10px;
+
+    font-size: 20px;
+    color: #f4f4f4;
+}
+.game-option-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+
+    width: 100%;
+    border-radius: 5px;
+
+    border: 1px solid #313131;
+
+
+}
+.game-option {
+    padding: 10px;
+    margin: 5px;
+
+    border-radius: 15px;
+
+    color: #313131;
+    background: #f4f4f4;
+    border: 2px solid #313131;
+    font-weight: 700;
+    font-size: 20px;
+    font-family: 'Poppins', sans-serif;
+
+    cursor: pointer;
+}
+.selected {
+    background: #EC625F !important;
+}
+.game-option:not(.selected):hover {
+    background: rgb(238, 141, 140) !important;  /* F17B79FF */
+}
+.game-option.start-game-button {
+    position: fixed;
+    bottom: 10px;
+    left: 42%;
+
+    width: 15%;
+
+    background: rgba(244, 244, 244, 0.8);
+}
+.game-option.start-game-button:hover {
+    transform: scale(1.1);
+}
+.game-option.disabled, .game-option.disabled:hover {
+    background: grey!important;
+    cursor: not-allowed;
+}
+
+/* Nav */
+.game-code-header {
+    padding: 5px 10px;
+
+    border-radius: 10px;
+
+    font-size: 25px;
+    font-weight: bold;
+    color: white;
+    background: rgba(236, 98, 95, 0.8);
+}
+.game-option.leave-button {
+    background: rgba(244, 244, 244, 0.6);
+}
+
+.lobby .player-container {
+    display: flex;
+    flex-direction: column;
+
+    margin-top: 10px;
+    padding: 10px;
+
+    border: 1px solid #313131;
+    border-radius: 5px;
+}
+.player-container .player-card-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+/* Player Tag/Card */
+.player-card-container .player-card {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 10px;
+    justify-content: space-between;
+    align-items: center;
+
+    width: 90%;
+
+    color: #f4f4f4;
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid #313131;
+    border-radius: 15px;
+
+    overflow: auto;
+}
+.player-card .player-picture {
+
+    width: 50px;
+    height: 50px;
+
+    border-right: 2px solid #313131;
+
+    object-fit: cover;
+}
+.player-card .player-name {
+    margin-left: 10px;
+
+    font-size: 25px;
+    font-weight: 750;
+}
+.player-card .player-streak {
+    padding: 10px 10px;
+
+    font-weight: 700;
+    font-size: 20px;
+    text-align: center;
+    color: black;
+
+    background-image: url("../images/code-arena-fire.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center bottom;
+    border-radius: 50px;
+}
+.player-card .player-level {
+    display: flex;
+
+    width: 50px;
+
+    font-size: 25px;
+    font-weight: 750;
+    color: #f4f4f4;
+}
+.player-card .side {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+/* Player Role (player, admin) tag */
+.player-card-container .player-role {
+    margin-left: 10px;
+
+    color: #f4f4f4;
+    border-radius: 50px;
+    font-size: 40px;
+}
+.player-role.bxs-user-badge {
+    color: #EC625F !important;
+}
+
+/* Player lobby status
+
+/* Mobile adaptations */
+@media screen and (max-width: 650px) {
+    .controls {
+        width: 80%;
+    }
+}

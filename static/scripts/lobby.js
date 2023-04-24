@@ -7,6 +7,7 @@ let create_user_card = function (username, pfp_src, level, admin) {
     // Player card container
     let div_player_card_container = document.createElement("div");
     div_player_card_container.className = "player-card-container";
+    div_player_card_container.id = username;
     div_player_container.appendChild(div_player_card_container);
 
     ////// Children creation
@@ -48,5 +49,53 @@ let create_user_card = function (username, pfp_src, level, admin) {
     }
     div_player_card_container.appendChild(icon_role);
 
+
+}
+
+let remove_player_card = function (username) {
+    let player_card = document.getElementById(username);
+    let player_container = document.querySelector("#start-game > div > div.lobby > div");
+
+    player_container.removeChild(player_card);
+}
+
+
+let update_player_count = function () {
+    let header = document.getElementById("player-count-header");
+    header.innerText = "Lobby (" + playerCount + " players)";
+}
+
+window.getCookie = function(name) {
+  let match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+  if (match) return match[2];
+}
+
+function selectGameOption (selectedOption, option_type_class) {
+  let elemGameOptionsContainer = document.querySelector("." + option_type_class);
+  let elemGameOptions = document.querySelectorAll("." + option_type_class + " input");
+  let multOption = elemGameOptionsContainer.classList.contains("mult");
+  let selectCount = 1;
+
+  if (selectedOption.classList.contains("disabled")) {
+      return
+  }
+
+  console.log(option_type_class)
+  // Deselects all
+  for (let i = 0; i < elemGameOptions.length; i++) {
+      let elemGameOption = elemGameOptions[i];
+      if (elemGameOption.classList.contains("selected") && !multOption) {
+          elemGameOption.classList.toggle("selected");
+
+      }
+  }
+
+  console.log("selectCount: " + selectCount)
+
+  // Selects one selected
+  if (!selectedOption.classList.contains("selected") || multOption){
+      selectedOption.classList.toggle("selected");
+      document.getElementById(option_type_class).value = selectedOption.name;
+  }
 
 }

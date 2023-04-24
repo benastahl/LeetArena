@@ -1,3 +1,6 @@
+body {
+  font-family: 'Poppins', sans-serif;
+}
 .home-header {
     background-image: url("../images/coding-arena-home-banner.jpeg");
     background-size: cover;
@@ -25,10 +28,6 @@
   text-align: center;
   border-radius: 40px;
   box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
-}
-
-.revealed {
-  display: flex;
 }
 
 /* FORMS */
@@ -162,6 +161,7 @@ select {
 }
 .access-button {
   font-size: 17px;
+  font-family: 'Poppins', sans-serif;
 }
 .reserve-pickup-button {
     background: hsl(340deg 89% 32%);
@@ -185,6 +185,64 @@ select {
   transform: translateY(-2px);
 }
 
+
+/* error popup */
+.error-popup-container {
+  display: none;
+  position: fixed;
+  z-index: 10;
+  padding-top: 175px;
+
+  width: 100%
+}
+.error-popup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+  margin: auto;
+
+  width: 350px;
+  height: 280px;
+
+  border-radius: 15px;
+  background: #f4f4f4;
+
+  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+
+}
+.error-popup i.bx-x {
+  position: relative;
+  right: 153px;
+
+  font-size: 30px;
+
+  cursor: pointer;
+}
+.error-popup i.bxs-error-circle {
+  font-size: 85px;
+  color:#c72020;
+}
+.error-popup h2 {
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: rgb(231, 231, 231);
+  margin-bottom: 25px;
+}
+.error-popup-message {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 5px;
+  border-radius: 5px;
+  text-align: center;
+
+  width: fit-content;
+  max-width: 100%;
+
+  background: rgb(231, 231, 231);
+
+  overflow: auto;
+}
 
 @media screen and (max-width: 650px) {
   .welcome-message {
@@ -251,3 +309,7 @@ select {
 }
 
 
+.revealed {
+  display: flex!important;
+  transition: ease-in-out;
+}

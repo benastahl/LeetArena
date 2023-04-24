@@ -12,6 +12,7 @@ section nav{
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
   transition: all 0.5s ease;
   background: rgba(65, 65, 65, 0.9);
+  font-family: 'Poppins', sans-serif;
 }
 
 .navbar-title {
@@ -36,6 +37,12 @@ section nav .navbar-logo {
 }
 
 /* * PROFILE * */
+.profile-dropdown {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Button content */
 .profile-button {
   display: flex;
   flex-direction: row;
@@ -49,13 +56,62 @@ section nav .navbar-logo {
   border: 2px solid black;
   background: #EC625F;
 
+  user-select: none;
   cursor: pointer;
 
+}
+.profile-button.active {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
 }
 .profile-button .bx {
   margin-right: 10px;
   font-size: 35px;
 }
+.profile-button #chevron {
+  -webkit-transition: -webkit-transform .5s ease-in-out;
+  -ms-transition: -ms-transform .5s ease-in-out;
+  transition: transform .5s ease-in-out;
+}
+.profile-button.active #chevron {
+  transform: rotate(180deg);
+}
 .profile-button .username {
   font-weight: 500;
 }
+
+/* Profile options' styles */
+.profile-options {
+  display: none;
+  position: absolute;
+  top: 63px;
+}
+.profile-options li {
+  height: 50px;
+  padding: 10px 5px;
+  text-align: center;
+
+  font-weight: bold;
+  border: 2px solid black;
+  border-top: 0;
+  background: #e37774;
+
+  cursor: pointer;
+  list-style: none;
+}
+.profile-options li:last-child {
+  border-bottom-left-radius: 15px;
+  border-bottom-right-radius: 15px;
+}
+.profile-options li:first-child {
+  border-top: 2px solid black;
+}
+.profile-options li a {
+  text-decoration: none;
+  color: black;
+}
+.profile-options li:hover {
+  background: #EC625F;
+  /*text-decoration: underline;*/
+}
+

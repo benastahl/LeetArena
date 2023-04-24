@@ -4,45 +4,31 @@
     <meta charset="UTF-8">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="../static/styles/defaults.css">
-    <link rel="stylesheet" href="../static/styles/waiting_room.css">
+    <link rel="stylesheet" href="../static/styles/lobby.css">
     <link rel="stylesheet" href="../static/styles/nav_bar.css">
-      <link rel="icon" href="../static/images/coding-arena-logo.png">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Lobby - CodeArena </title>
-      <script>
+    <link rel="icon" href="../static/images/coding-arena-logo.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
           window.addEventListener("beforeunload", function (ev) {
             console.log("User has disconnected!");
             socket.emit('disconnected', {room_code: "{{ room_code }}", username: "{{ user.username }}"});
         })
       </script>
-   </head>
+    <title> Lobby - LeetArena </title>
+
+
+
+  </head>
 
   <!-- Loading Activation -->
   <link href="../static/styles/loading.css" rel="stylesheet">
   <div class="loading-overlay"></div>
   <script src="../static/scripts/loading.js" ></script>
-  <script src="../static/scripts/lobby.js" ></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
-    <script type="text/javascript" charset="utf-8">
-        var socket = io();
-
-        socket.on("connect", function () {
-            console.log("Client connected.")
-            socket.emit("join", {"username": "{{user.username}}", "room": "{{room_code}}"})
-        });
-
-        socket.on("user-joined", function (player) {
-            console.log(player.username, "joined the game.")
-            create_user_card(player.username, player.pfp, player.level, player.admin)
-        });
-
-
-    </script>
 
   <body>
     <section>
         <nav>
-          <img onclick="location.href = '/'; activateLoadingScreen(null)" class="navbar-logo" src="../static/images/coding-arena-logo.png" alt="CodeArena-logo">
+          <img onclick="location.href = '/'; activateLoadingScreen(null)" class="navbar-logo" src="../static/images/coding-arena-logo.png" alt="LeetArena-logo">
 
             {% if not user %}
               <div class="profile-details">
@@ -67,46 +53,56 @@
                       </ul>
                 </div>
             {% endif %}
+            <div class="game-code-header">{{room_code}}</div>
+            <button class="game-option leave-button" onclick="leave_game()">Leave</button>
+
 
       </nav>
 
         <div class="content">
-          <h1>{{user.username}}, welcome to the lobby!</h1>
+            <h1>{{user.username}}, welcome to the lobby!</h1>
 
-        <form class="lobby-section" method="post" id="start-game" action="/start-game">
-            <div class="lobby-container">
+            <div class="lobby-section" id="start-game">
+                <div class="lobby-container">
                 {% if admin %}
                 <div class="controls">
                     <h2 class="controls-main-header">Lobby Controls</h2>
                     <h3 class="control-header">Game Mode</h3>
                     <div class="game-mode-select game-option-container">
                         <input onclick="selectGameOption(this, 'game-mode-select')" name="DUEL"         value="DUEL"        type="button" class="game-option game-mode selected">
-                        <input onclick="selectGameOption(this, 'game-mode-select')" name="TEAM BATTLE"  value="TEAM BATTLE" type="button" class="game-option game-mode">
-                        <input onclick="selectGameOption(this, 'game-mode-select')" name="BATTLE"       value="BATTLE"      type="button" class="game-option game-mode">
+                        <input onclick="selectGameOption(this, 'game-mode-select')" name="TEAM BATTLE"  value="TEAM BATTLE" type="button" class="game-option game-mode disabled">
+                        <input onclick="selectGameOption(this, 'game-mode-select')" name="BATTLE"       value="BATTLE"      type="button" class="game-option game-mode disabled">
                         <input type="hidden" id="game-mode-select" name="game-mode" value="DUEL">
                     </div>
                     <h3 class="control-header">Difficulty</h3>
                     <div class="game-difficulty-select game-option-container">
                         <input onclick="selectGameOption(this, 'game-difficulty-select')" name="EASY"   value="EASY"    type="button" id="easy-difficulty"     class="game-option game-mode selected">
-                        <input onclick="selectGameOption(this, 'game-difficulty-select')" name="MEDIUM" value="MEDIUM"  type="button" id="medium-difficulty" class="game-option game-mode">
-                        <input onclick="selectGameOption(this, 'game-difficulty-select')" name="HARD"   value="HARD"    type="button" id="hard-difficulty"     class="game-option game-mode">
+                        <input onclick="selectGameOption(this, 'game-difficulty-select')" name="MEDIUM" value="MEDIUM"  type="button" id="medium-difficulty" class="game-option game-mode disabled">
+                        <input onclick="selectGameOption(this, 'game-difficulty-select')" name="HARD"   value="HARD"    type="button" id="hard-difficulty"     class="game-option game-mode disabled">
                         <input type="hidden" id="game-difficulty-select" name="game-difficulty" value="EASY">
                     </div>
-                    <h3 class="control-header">Language(s)</h3>
+                    <h3 class="control-header">Language</h3>
                     <div class="game-language-select game-option-container">
                         <input onclick="selectGameOption(this, 'game-language-select')" name="PYTHON3"    value="PYTHON3"    type="button" id="python-language"     class="game-option game-language selected">
-                        <input onclick="selectGameOption(this, 'game-language-select')" name="JAVA"       value="JAVA"       type="button" id="java-language"       class="game-option game-language">
+                        <input onclick="selectGameOption(this, 'game-language-select')" name="JAVA"       value="JAVA"       type="button" id="java-language"       class="game-option game-language disabled">
                         <input onclick="selectGameOption(this, 'game-language-select')" name="JAVASCRIPT" value="JAVASCRIPT" type="button" id="javascript-language" class="game-option game-language">
                         <input onclick="selectGameOption(this, 'game-language-select')" name="C++"        value="C++"        type="button" id="c++-language"        class="game-option game-language">
                         <input type="hidden" id="game-language-select" name="game-language" value="PYTHON3">
                     </div>
+                    <input type="hidden" id="room-code" value="{{room_code}}">
                 </div>
+                {% else %}
+                <style>
+                    .lobby-container {
+                        justify-content: center;
+                    }
+                </style>
                 {% endif %}
                 <div class="lobby">
-                    <h2 class="controls-main-header">Lobby (2 players)</h2>
+                    <h2 id="player-count-header" class="controls-main-header">Lobby (- players)</h2>
                     <div class="player-container">
                         {% for player in players %}
-                        <div class="player-card-container">
+                        <div id="{{player}}" class="player-card-container">
                             <div class="player-card">
                                 <div class="left side">
                                     <img src="https://c4.wallpaperflare.com/wallpaper/273/268/863/appa-avatar-the-last-airbender-glasses-wallpaper-thumb.jpg" class="player-picture" alt="benastahl pfp">
@@ -125,39 +121,94 @@
                         {% endfor %}
                     </div>
                 </div>
-            </div>
-        </form>
-      </div>
-        <button class="game-option start-game-button" form="start-game" type="submit">Start Game</button>
 
+            </div>
+            </div>
+        </div>
+        {% if admin %}
+        <button type="button" onclick="start_game()" class="game-option start-game-button">Start Game</button>
+        {% endif %}
     </section>
 
-    <script id="selectGameMode">
-      function selectGameOption (selectedOption, option_type_class) {
-          let elemGameOptionsContainer = document.querySelector("." + option_type_class);
-          let elemGameOptions = document.querySelectorAll("." + option_type_class + " input");
-          let multOption = elemGameOptionsContainer.classList.contains("mult");
-          let selectCount = 1
-          console.log(option_type_class)
-          // Deselects all
-          for (let i = 0; i < elemGameOptions.length; i++) {
-              let elemGameOption = elemGameOptions[i];
-              if (elemGameOption.classList.contains("selected") && !multOption) {
-                  elemGameOption.classList.toggle("selected");
+    <!-- Utilities -->
+    <script src="../static/scripts/lobby.js" ></script>
 
-              }
-          }
+    <!-- Local Utils -->
+    <script>
+        let start_game = function () {
+            // Make sure user making request is admin
+            if ("{{admin}}" !== "True") {
+                return;
+            }
 
-          console.log("selectCount: " + selectCount)
+            // if (playerCount <= 1) {
+            //     alert("You must have more than one player to start the game.");
+            //     return;
+            // }
 
-          // Selects one selected
-          if (!selectedOption.classList.contains("selected") || multOption){
-              selectedOption.classList.toggle("selected");
-              document.getElementById(option_type_class).value = selectedOption.name;
-          }
+            // Collect game data
+            let game_mode = document.getElementById("game-mode-select").value;
+            let game_difficulty = document.getElementById("game-difficulty-select").value;
+            let game_lang = document.getElementById("game-language-select").value;
 
-      }
-  </script>
 
+            console.log("Starting game...")
+            // Send start game signal
+            socket.emit('start-game',
+                {
+                    game_mode: game_mode,
+                    game_difficulty: game_difficulty,
+                    game_lang: game_lang,
+                    auth: window.getCookie('auth_token'),
+                    room_code: '{{room_code}}',
+                });
+
+        }
+
+        let leave_game = function () {
+            console.log("Leaving the game...");
+            socket.emit('leave', {'username': '{{user.username}}', 'room': '{{room_code}}'});
+            window.location.href = '/';
+        };
+
+    </script>
+
+    <!-- Sockets -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+    <script id="socket-handler" type="text/javascript" charset="utf-8">
+        // LOBBY SOCKETS
+        let socket = io();
+        let playerCount = {{players | length}};
+        update_player_count();
+
+        socket.on("connect", function () {
+            console.log("Client connected.")
+            socket.emit("join", {"username": "{{user.username}}", "room": "{{room_code}}"})
+        });
+
+        socket.on("user-joined", function (player) {
+            console.log(player.username, "joined the game.")
+            playerCount++;
+            update_player_count()
+            create_user_card(player.username, player.pfp, player.level, player.admin)
+        });
+
+        socket.on("user-left", function (player) {
+            console.log(player.username + " left the game.")
+            playerCount--;
+            update_player_count()
+            remove_player_card(player.username);
+        });
+
+        socket.on("room-closed", function () {
+            window.location.href = "/?error=The room has been closed.";
+        });
+
+        socket.on("game-started", function () {
+            // Reload page to render game
+            location.reload()
+        });
+
+    </script>
   </body>
 </html>

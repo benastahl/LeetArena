@@ -5,10 +5,7 @@
 <style type="text/css" media="screen">
     #editor {
         position: absolute;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        left: 0;
+        top: 100px;
         width: 500px;
         height: 600px;
     }
@@ -21,11 +18,18 @@
     return x;
 }</div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.15.3/ace.js" type="text/javascript" charset="utf-8"></script>
+<script src="../static/scripts/ace-builds/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+<script src="../static/scripts/ace-builds/src-noconflict/ext-language_tools.js"></script>
 <script>
     var editor = ace.edit("editor");
-    editor.setTheme("ace/theme/dracula");
-    editor.session.setMode("ace/mode/python");
+    editor.setTheme("ace/theme/monokai");
+    editor.session.setMode("ace/mode/javascript");
+    ace.require("ace/ext/language_tools");
+    editor.setOptions({
+        enableBasicAutocompletion: true,
+        enableSnippets: true,
+        enableLiveAutocompletion: true
+    });
 </script>
 </body>
 </html>

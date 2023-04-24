@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+              <link rel="stylesheet" href="../static/styles/defaults.css">
+
+      <link rel="stylesheet" href="../static/styles/lobby.css">
+    <link rel="stylesheet" href="../static/styles/arena.css">
+    <link rel="stylesheet" href="../static/styles/nav_bar.css">
+
+    <link rel="icon" href="../static/images/coding-arena-logo.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+          window.addEventListener("beforeunload", function (ev) {
+            console.log("User has disconnected!");
+            socket.emit('disconnected', {room_code: "{{ room_code }}", username: "{{ user.username }}"});
+        })
+      </script>
+    <title> Arena - LeetArena </title>
+
+
+
+  </head>
+
+  <!-- Loading Activation -->
+  <link href="../static/styles/loading.css" rel="stylesheet">
+  <script src="../static/scripts/loading.js" ></script>
+  <div class="loading-overlay"></div>
+
+
+  <body>
+    <section>
+        <nav>
+          <img onclick="location.href = '/'; activateLoadingScreen(null)" class="navbar-logo" src="../static/images/coding-arena-logo.png" alt="LeetArena-logo">
+            <button class="game-option leave-button" onclick="socket.emit('leave', {'username': '{{user.username}}', 'room': '{{room_code}}'}); window.location.href = '/'">Leave</button>
+      </nav>
+      <div class="content-container">
+        <div class="challenge-container">
+          <div id="question">
+            <header>
+              <h1>Challenge</h1>
+            </header>
+          </div>
+          <div id="editor">{{prompt}}</div>
+        </div>
+
+      </div>
+    </section>
+
+    <script src="../static/scripts/ace-builds/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script src="../static/scripts/ace-builds/src-noconflict/ext-language_tools.js"></script>
+    <script>
+        let editor = ace.edit("editor");
+        editor.setTheme("ace/theme/monokai");
+        editor.session.setMode("ace/mode/javascript");
+        ace.require("ace/ext/language_tools");
+        editor.setFontSize(17);
+        editor.setOptions({
+            enableBasicAutocompletion: true,
+            enableSnippets: true,
+            enableLiveAutocompletion: true
+        });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+    <script type="text/javascript" charset="utf-8">
+        // GAME SOCKETS
+        let socket = io();
+
+        socket.on("connect", function () {
+            console.log("Client connected.")
+        });
+
+        socket.on("user-left", function (player) {
+            console.log(player.username + " left the game.")
+        });
+
+        socket.on("room-closed", function () {
+            window.location.href = "/";
+        });
+
+    </script>
+  </body>
+</html>
