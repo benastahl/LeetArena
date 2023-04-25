@@ -51,6 +51,7 @@ class Users(mongoengine.Document):
 
 
 Rooms.objects(started=0).delete()
+Rooms.objects(started=1).delete()
 
 
 # Base
@@ -60,7 +61,7 @@ def display_home():
     auth_token = request.cookies.get("auth_token")
 
     user = Users.objects(auth_token=auth_token).first()
-    start_mode = {True: "start-lobby-container", False: "signup-form-container"}.get(user)
+    start_mode = {True: "create-lobby-container", False: "signup-form-container"}.get(bool(user))
 
     # Renders home.
     return render_template(
@@ -135,9 +136,9 @@ def create_lobby():
     Rooms(
         room_code=room_code,
         started=0,
-        game_mode=None,
-        game_difficulty=None,
-        game_lang=None,
+        game_mode=request.form.get("game-mode"),
+        game_difficulty=request.form.get("game-difficulty"),
+        game_lang=request.form.get("game-language"),
         admin=user.username,
         players=[]
     ).save()
@@ -206,6 +207,8 @@ def user_left(data):
         print("Admin has left the game. Closing lobby...")
         emit("room-closed", room=room_code)
         close_room(room=room_code)
+        if room:
+            room.delete()
         return
 
     # Removes player's socket connection from room.
@@ -229,12 +232,6 @@ def start_game(data):
     user = Users.objects(auth_token=auth_token).first()
 
     # Collect game start data from post request.
-    game_data = {
-        "game_mode": data.get("game_mode"),
-        "game_difficulty": data.get("game_difficulty"),
-        "game_lang": data.get("game_lang"),
-        "started": 1
-    }
     room_code = data.get("room_code")
 
     # Collects room data.
@@ -249,9 +246,8 @@ def start_game(data):
         return
 
     print(f"{user.username} (admin) is starting the game {room_code}...")
-    print(f"Game settings: {game_data}")
     # Update room database data
-    room.update(**game_data)
+    room.update(started=1)
 
     # Notify players that game was started. Signal will trigger JS to
     # reload page and render game html.

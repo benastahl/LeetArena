@@ -20,7 +20,7 @@
   <body>
     <div id="error-popup" class="error-popup-container">
             <div class="error-popup">
-                <i onclick="toggle_popup('error-popup')" class='bx bx-x'></i>
+
                 <i class='bx bxs-error-circle'></i>
                 <h2 class="error-header">An error occurred!</h2>
                 <p class="error-popup-message"></p>
@@ -116,6 +116,36 @@
                   </form>
               </div>
           </div>
+        <div id="create-lobby-container" class="create-lobby-container">
+            <form class="controls" action="/create-lobby" method="post">
+                    <i onclick="toggle_popup('create-lobby-container')" class='bx bx-x'></i>
+                    <h2 class="controls-main-header">Lobby Controls</h2>
+                    <h3 class="control-header">Game Mode</h3>
+                    <div class="game-mode-select game-option-container">
+                        <input onclick="selectGameOption(this, 'game-mode-select')" name="DUEL"         value="DUEL"        type="button" class="game-option game-mode selected">
+                        <input onclick="selectGameOption(this, 'game-mode-select')" name="TEAM BATTLE"  value="TEAM BATTLE" type="button" class="game-option game-mode disabled">
+                        <input onclick="selectGameOption(this, 'game-mode-select')" name="BATTLE"       value="BATTLE"      type="button" class="game-option game-mode disabled">
+                        <input type="hidden" id="game-mode-select" name="game-mode" value="DUEL">
+                    </div>
+                    <h3 class="control-header">Difficulty</h3>
+                    <div class="game-difficulty-select game-option-container">
+                        <input onclick="selectGameOption(this, 'game-difficulty-select')" name="EASY"   value="EASY"    type="button" id="easy-difficulty"     class="game-option game-mode selected">
+                        <input onclick="selectGameOption(this, 'game-difficulty-select')" name="MEDIUM" value="MEDIUM"  type="button" id="medium-difficulty" class="game-option game-mode disabled">
+                        <input onclick="selectGameOption(this, 'game-difficulty-select')" name="HARD"   value="HARD"    type="button" id="hard-difficulty"     class="game-option game-mode disabled">
+                        <input type="hidden" id="game-difficulty-select" name="game-difficulty" value="EASY">
+                    </div>
+                    <h3 class="control-header">Language</h3>
+                    <div class="game-language-select game-option-container">
+                        <input onclick="selectGameOption(this, 'game-language-select')" name="PYTHON3"    value="PYTHON3"    type="button" id="python-language"     class="game-option game-language selected">
+                        <input onclick="selectGameOption(this, 'game-language-select')" name="JAVA"       value="JAVA"       type="button" id="java-language"       class="game-option game-language disabled">
+                        <input onclick="selectGameOption(this, 'game-language-select')" name="JAVASCRIPT" value="JAVASCRIPT" type="button" id="javascript-language" class="game-option game-language">
+                        <input onclick="selectGameOption(this, 'game-language-select')" name="C++"        value="C++"        type="button" id="c++-language"        class="game-option game-language">
+                        <input type="hidden" id="game-language-select" name="game-language" value="PYTHON3">
+                    </div>
+                    <input type="hidden" id="room-code" value="{{room_code}}">
+                    <button class="game-option create-lobby-button" type="submit" >Create Lobby</button>
+            </form>
+        </div>
 
         <div class="home-header">
             <div onclick="toggle_popup('{{ start_mode }}')">
