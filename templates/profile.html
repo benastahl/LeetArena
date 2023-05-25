@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="UTF-8">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="../static/styles/defaults.css">
+    <link rel="stylesheet" href="../static/styles/profile.css">
+    <link rel="stylesheet" href="../static/styles/nav_bar.css">
+      <link rel="icon" href="../static/images/coding-arena-logo.png">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> {{profile_user.username}} - LeetArena </title>
+      <link rel="stylesheet" href="../static/styles/arena.css">
+  </head>
+
+  <!-- Loading Activation -->
+  <link href="../static/styles/loading.css" rel="stylesheet">
+  <div class="loading-overlay"></div>
+  <script src="../static/scripts/loading.js" ></script>
+
+  <body>
+    <section>
+        <nav>
+          <img onclick="location.href = '/'; activateLoadingScreen(null)" class="navbar-logo" src="../static/images/coding-arena-logo.png" alt="athleats-logo">
+
+            {% if not user %}
+              <div class="access-buttons-section">
+                  <button onclick="toggle_popup('login-form-container')" id="login-button" class="access-button"> LOGIN </button>
+                  <button onclick="toggle_popup('signup-form-container')" id="signup-button" class="access-button"> SIGNUP </button>
+              </div>
+            {% else %}
+
+            <div class="profile-dropdown">
+                <div class="profile-button" onclick="toggle_profile_options()">
+                    <i class="bx bx-user-circle guest-profile-picture"></i>
+                    <span class="username">{{user.username}}</span>
+                    <i id="chevron" class='arrow bx bx-chevron-down' ></i>
+
+                </div>
+
+                    <div id="profile-options" class="profile-options">
+                        <ul>
+                            <li onclick="redirect('/u/{{user.username}}')" aria-selected="true"><a>Profile</a></li>
+                            <li onclick="redirect('/c/{{user.clan}}')"><a>Clan</a></li>
+                            <li onclick="redirect('/settings')"><a>Settings</a></li>
+                            <li onclick="redirect('/logout')"><a>Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+
+            {% endif %}
+
+
+      </nav>
+
+        <div class="home-content">
+
+          <div class="profile-card-container">
+            <div class="profile-card">
+                <header>
+                    <div class="left side">
+                        <i class="bx bx-user-circle guest-profile-picture"></i>
+                        <h1 class="username">{{profile_user.username}}</h1>
+                    </div>
+                    <div class="right side">
+                        <div class="stat-icon"><div class="front">13</div></div>
+                    </div>
+
+                </header>
+
+            </div>
+          </div>
+
+        </div>
+
+    </section>
+  </body>
+
+  <!-- Default utilities -->
+  <script src="../static/scripts/_utils.js"></script>
+
+  <!-- Reveal error messages -->
+  <script>
+      // Add query collector. Optimize this.
+      let login_error = "{{ login_error }}";
+      let signup_error = "{{ signup_error }}";
+      let redirect_error = params.error;
+
+      if (redirect_error) { // Default redirect error from another page.
+          let popup_message = document.querySelector(".error-popup-message");
+          popup_message.innerText = redirect_error;
+          toggle_popup("error-popup");
+      } else if (login_error) { // Login error
+          document.getElementById("login-error").style.display = "block";
+          toggle_popup("login-form-container");
+      } else if (signup_error) { // Signup error
+          document.getElementById("signup-error").style.display = "block";
+          toggle_popup("signup-form-container");
+      }
+  </script>
+
+  <!-- Local Utilities -->
+  <script>
+      let profile_button = document.querySelector(".profile-button");
+      let profile_options_nodes = document.querySelectorAll(".profile-options li");
+      window.addEventListener("load", function () {
+          for (let i = 0; i < profile_options_nodes.length; i++) {
+              profile_options_nodes[i].style.width = profile_button.getBoundingClientRect().width.toString() + "px";
+              console.log(profile_options_nodes[i]);
+          }
+      })
+
+      let toggle_profile_options = function () {
+          profile_button.classList.toggle("active");
+          toggle_popup("profile-options");
+      }
+
+      let toggle_start = function () {
+          toggle_popup('{{ start_mode }}');
+          toggle_focus_blur('start-options')
+      }
+  </script>
+
+</html>

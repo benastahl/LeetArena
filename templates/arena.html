@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-              <link rel="stylesheet" href="../static/styles/defaults.css">
+      <link rel="stylesheet" href="../static/styles/defaults.css">
 
       <link rel="stylesheet" href="../static/styles/lobby.css">
     <link rel="stylesheet" href="../static/styles/arena.css">
@@ -23,9 +23,11 @@
 
   </head>
 
+   <script src="../static/scripts/_utils.js">
+
   <!-- Loading Activation -->
   <link href="../static/styles/loading.css" rel="stylesheet">
-  <script src="../static/scripts/loading.js" ></script>
+  <script src="../static/scripts/loading.js"></script>
   <div class="loading-overlay"></div>
 
 
@@ -33,28 +35,79 @@
     <section>
         <nav>
           <img onclick="location.href = '/'; activateLoadingScreen(null)" class="navbar-logo" src="../static/images/coding-arena-logo.png" alt="LeetArena-logo">
-            <button class="game-option leave-button" onclick="socket.emit('leave', {'username': '{{user.username}}', 'room': '{{room_code}}'}); window.location.href = '/'">Leave</button>
-      </nav>
+            {% if admin %}
+            <button class="game-option leave-button" onclick="leave_game()">Close Lobby</button>
+            {% else %}
+            <button class="game-option leave-button" onclick="leave_game()">Leave Game</button>
+            {% endif %}      </nav>
       <div class="content-container">
-        <div class="challenge-container">
+
+        <form method="post" onsubmit="submit_solution()" class="challenge-container">
+          <input type="hidden" name="language" value="{{room.game_lang}}">
+          <input type="hidden" name="question_id" value="{{problem['questionId']}}">
+          <input type="hidden" name="title_id" value="{{problem['titleSlug']}}">
+          <input id="typed-code" type="hidden" name="typed_code" value="">
+
+          <div id="start-test" class="sol-test">
+
+          </div>
           <div id="question">
             <header>
-              <h1>Challenge</h1>
+              <h1>{{problem['title']}}</h1>
             </header>
+            {{problem["content"] | safe}}
+
           </div>
-          <div id="editor">{{prompt}}</div>
-        </div>
+          <div class="editor-container">
+
+            <div id="editor">{{problem["prompt_snippet"]}}</div>
+            <div class="editor-buttons">
+              <button id="test-button" class="game-option" onclick="toggle_test()" >Show Testing Panel</button>
+              <button formaction="/submit-solution" type="submit" class="game-option">Submit Solution</button>
+
+            </div>
+
+          </div>
+
+
+        </form>
 
       </div>
     </section>
 
+
+    <!-- Local Utils -->
+    <script type="text/javascript" charset="utf-8">
+      question = document.getElementById('question');
+      test_button = document.getElementById('test-button')
+
+      function toggle_test() {
+
+        toggle_popup('start-test');
+
+        if (document.getElementById('start-test').classList.contains('revealed')) {
+          test_button.innerText = 'Show Question';
+          question.style.display = 'none';
+        } else {
+          test_button.innerText = 'Show Testing Panel';
+          question.style.display = 'block';
+        }
+
+      }
+      
+      function submit_solution() {
+        document.getElementById("typed-code").value = editor.getValue();
+        activateLoadingScreen();
+      }
+      
+    </script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.9.6/ace.js" integrity="sha512-czfWedq9cnMibaqVP2Sw5Aw1PTTabHxMuTOkYkL15cbCYiatPIbxdV0zwhfBZKNODg0zFqmbz8f7rKmd6tfR/Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.9.6/ext-language_tools.js" integrity="sha512-czfWedq9cnMibaqVP2Sw5Aw1PTTabHxMuTOkYkL15cbCYiatPIbxdV0zwhfBZKNODg0zFqmbz8f7rKmd6tfR/Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script>
         let editor = ace.edit("editor");
         editor.setTheme("ace/theme/monokai");
-        editor.session.setMode("ace/mode/javascript");
+        editor.session.setMode("ace/mode/{{langModes[room.game_lang]}}");
         ace.require("ace/ext/language_tools");
         editor.setFontSize(17);
         editor.setOptions({
@@ -69,7 +122,7 @@
         let socket = io();
 
         socket.on("connect", function () {
-            console.log("Client connected.")
+            console.log("Client connected.");
         });
 
         socket.on("user-left", function (player) {
@@ -79,6 +132,16 @@
         socket.on("room-closed", function () {
             window.location.href = "/";
         });
+
+        let leave_game = function () {
+            if ("{{admin}}" !== "None" && !confirm("Are you sure you want to close the lobby?")) {
+                return
+            }
+            console.log("Leaving the game...");
+            socket.emit('leave', {'username': '{{user.username}}', 'room': '{{room_code}}'});
+            location.href = "/";
+        };
+
 
     </script>
   </body>

@@ -54,8 +54,11 @@
                 </div>
             {% endif %}
             <div class="game-code-header">{{room_code}}</div>
-            <button class="game-option leave-button" onclick="leave_game()">Leave</button>
-
+            {% if admin %}
+            <button class="game-option leave-button" onclick="leave_game()">Close Lobby</button>
+            {% else %}
+            <button class="game-option leave-button" onclick="leave_game()">Leave Game</button>
+            {% endif %}
 
       </nav>
 
@@ -133,9 +136,12 @@
         }
 
         let leave_game = function () {
+            if ("{{admin}}" !== "None" && !confirm("Are you sure you want to close the lobby?")) {
+                return
+            }
             console.log("Leaving the game...");
             socket.emit('leave', {'username': '{{user.username}}', 'room': '{{room_code}}'});
-            window.location.href = '/';
+            location.href = "/";
         };
 
     </script>

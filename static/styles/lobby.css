@@ -14,7 +14,7 @@ body {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
-    justify-content: space-between;
+    justify-content: center;
 }
 .content h1 {
     position: relative;
@@ -119,7 +119,7 @@ body {
     background: rgba(236, 98, 95, 0.8);
 }
 .game-option.leave-button {
-    background: rgba(244, 244, 244, 0.6);
+    background: rgba(244, 244, 244, 0.9);
 }
 
 .lobby .player-container {

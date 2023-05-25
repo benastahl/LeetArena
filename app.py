@@ -9,8 +9,9 @@ import pymysql
 import mongoengine
 import logging
 from datetime import datetime
+from gpt import get_random_problem, send_solution
 from dotenv import load_dotenv, find_dotenv
-from flask import Flask, render_template, redirect, request
+from flask import Flask, render_template, redirect, request, abort
 from flask_socketio import SocketIO, emit, rooms, join_room, close_room, leave_room
 
 logging.getLogger('socketio').setLevel(logging.CRITICAL)
@@ -32,6 +33,14 @@ db = mongoengine.connect(
 )
 
 
+langModes = {
+    "Python3": "python",
+    "JavaScript": "javascript",
+    "Java": "java",
+    "C++": "cpp"
+}
+
+
 class Rooms(mongoengine.Document):
     room_code = mongoengine.StringField()
     started = mongoengine.IntField()
@@ -40,6 +49,8 @@ class Rooms(mongoengine.Document):
     game_lang = mongoengine.StringField()
     admin = mongoengine.StringField()
     players = mongoengine.ListField(mongoengine.StringField())
+    created = mongoengine.DateTimeField()
+    problem = mongoengine.DictField()
 
 
 class Users(mongoengine.Document):
@@ -48,10 +59,19 @@ class Users(mongoengine.Document):
     hashed_password = mongoengine.StringField()
     auth_token = mongoengine.StringField()
     admin = mongoengine.IntField()
+    created = mongoengine.DateTimeField()
+
+    games_won = mongoengine.IntField()
+    games_played = mongoengine.IntField()
+    most_used_language = mongoengine.StringField()
+    level = mongoengine.IntField()
+    clan = mongoengine.StringField()
 
 
-Rooms.objects(started=0).delete()
-Rooms.objects(started=1).delete()
+class Clans(mongoengine.Document):
+    name = mongoengine.StringField()
+    members = mongoengine.ListField(mongoengine.StringField())
+    created = mongoengine.DateTimeField()
 
 
 # Base
@@ -61,7 +81,7 @@ def display_home():
     auth_token = request.cookies.get("auth_token")
 
     user = Users.objects(auth_token=auth_token).first()
-    start_mode = {True: "create-lobby-container", False: "signup-form-container"}.get(bool(user))
+    start_mode = "start-options" if bool(user) else "signup-form-container"
 
     # Renders home.
     return render_template(
@@ -69,6 +89,49 @@ def display_home():
         user=user,
         start_mode=start_mode
     )
+
+
+@app.route("/u/<username>", methods=["GET"])
+def display_profile(username):
+    auth_token = request.cookies.get("auth_token")
+
+    user = Users.objects(auth_token=auth_token).first()
+    profile_user = Users.objects(username=username).first()
+
+    if not profile_user:
+        abort(404)
+
+    # Render template despite logged in or not.
+    return render_template(
+        "profile.html",
+        user=user,
+        profile_user=profile_user,
+    )
+
+
+@app.route("/settings", methods=["GET"])
+def display_settings():
+    auth_token = request.cookies.get("auth_token")
+    user = Users.objects(auth_token=auth_token).first()
+    if not user:
+        return redirect("/")
+
+    return render_template(
+        "settings.html",
+        user=user
+    )
+
+
+@app.route("/settings", methods=["POST"])
+def save_settings():
+    auth_token = request.cookies.get("auth_token")
+    user = Users.objects(auth_token=auth_token).first()
+    if not user:
+        return redirect("/")
+
+    deactivate_account = request.form.get("deactivate")
+    save = request.form.get("save")
+    return redirect("/settings")
 
 
 # Game
@@ -90,21 +153,15 @@ def display_game(room_code):
     if room.started:
         if user.username not in room.players:  # Redirects if room has already started and player is not enrolled in game.
             return redirect("/?error=The game you are trying to join has started.")
-        prompt = \
-"""\
-function foo(items) {
-    let x = "All this is syntax highlighted";
-    return x;
-}
-"""
+
         # Renders the game.
         return render_template(
             "arena.html",
             room_code=room_code,
             room=room,
             user=user,
-            question="Please answer this question.",
-            prompt=prompt
+            problem=room.problem,
+            langModes=langModes
         )
 
     # Default rendering of the lobby.
@@ -126,6 +183,11 @@ def create_lobby():
     if not user:
         return redirect("/")
 
+    # Checks to see if admin already has a room created.
+    room = Rooms.objects(admin=user.username).first()
+    # if room:
+    #     return redirect(f"/?error=You already have a room created. Join with room code: {room.room_code}")
+
     # Create a lobby with join code
     room_code_length = 7
     room_code = ''.join(random.choices(string.ascii_uppercase +
@@ -145,6 +207,19 @@ def create_lobby():
     print(f"Created room {room_code}")
 
     return redirect(f"/game/{room_code}")
+
+
+@app.route("/submit-solution", methods=["POST"])
+def submit_solution():
+    auth_token = request.cookies.get("auth_token")
+    user = Users.objects(auth_token=auth_token).first()
+
+    if not user:
+        abort(404)
+
+    solution_response = send_solution(**request.form)
+    print(solution_response)
+    return solution_response
 
 
 # Game Events
@@ -246,8 +321,11 @@ def start_game(data):
         return
 
     print(f"{user.username} (admin) is starting the game {room_code}...")
+    problem = get_random_problem(difficulty=room.game_difficulty, language=room.game_lang)
+    print(problem)
     # Update room database data
     room.update(started=1)
+    room.update(problem=problem)
 
     # Notify players that game was started. Signal will trigger JS to
     # reload page and render game html.
@@ -259,15 +337,15 @@ def start_game(data):
 
 @app.route("/login", methods=["POST"])
 def login():
-    email = request.form["email"]
+    username = request.form["username"]
     password = request.form["pass"]  # plain text password
 
     # Checks to see if the email has an account already.
-    user = Users.objects(email=email).first()
+    user = Users.objects(username=username).first()
     if not user:
         return render_template(
             "home.html",
-            login_error="Email not found.",
+            login_error="User not found.",
         )
 
     # Password checker. Checks hashed (true) password to (entered) plain text password.
@@ -314,6 +392,7 @@ def signup():
         hashed_password=hashed_password,
         auth_token=auth_token,
         admin=0,
+        created=datetime.now()
     ).save()
 
     # Set auth cookie token

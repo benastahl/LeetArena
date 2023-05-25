@@ -19,13 +19,13 @@
 
   <body>
     <div id="error-popup" class="error-popup-container">
-            <div class="error-popup">
-
-                <i class='bx bxs-error-circle'></i>
-                <h2 class="error-header">An error occurred!</h2>
-                <p class="error-popup-message"></p>
-            </div>
+        <div class="error-popup">
+            <i onclick="toggle_popup('error-popup')" class='bx bx-x'></i>
+            <i class='bx bxs-error-circle'></i>
+            <h2 class="error-header">An error occurred!</h2>
+            <p class="error-popup-message"></p>
         </div>
+    </div>
     <section>
         <nav>
           <img onclick="location.href = '/'; activateLoadingScreen(null)" class="navbar-logo" src="../static/images/coding-arena-logo.png" alt="athleats-logo">
@@ -47,10 +47,10 @@
 
                     <div id="profile-options" class="profile-options">
                         <ul>
-                            <li><a href="/profile">Profile</a></li>
-                            <li><a href="/clan">Clan</a></li>
-                            <li><a href="/settings">Settings</a></li>
-                            <li><a href="/logout">Logout</a></li>
+                            <li onclick="redirect('/u/{{user.username}}')"><a>Profile</a></li>
+                            <li onclick="redirect('/c/{{user.clan}}')"><a>Clan</a></li>
+                            <li onclick="redirect('/settings')"><a>Settings</a></li>
+                            <li onclick="redirect('/logout')"><a>Logout</a></li>
                         </ul>
                     </div>
                 </div>
@@ -61,9 +61,7 @@
 
       </nav>
 
-        <div class="home-content">
-
-        </div>
+        <div class="home-content"></div>
         <div id="signup-form-container" class="form-container">
             <div class="popup-form">
                 <i onclick="toggle_popup('signup-form-container')" class='bx bx-x'></i>
@@ -103,7 +101,7 @@
                     </div>
                   <form onsubmit="activateLoadingScreen('submit-login-button')" name="login" action="/login" method="post">
                       <label>
-                          <input required type="text" name="email" placeholder="email">
+                          <input required type="text" name="username" placeholder="username">
                       </label>
                       <label>
                           <input required type="password" name="pass" placeholder="password">
@@ -116,10 +114,10 @@
                   </form>
               </div>
           </div>
-        <div id="create-lobby-container" class="create-lobby-container">
-            <form class="controls" action="/create-lobby" method="post">
-                    <i onclick="toggle_popup('create-lobby-container')" class='bx bx-x'></i>
-                    <h2 class="controls-main-header">Lobby Controls</h2>
+        <div id="create-lobby" class="create-lobby-container">
+            <form id="controls" class="controls" action="/create-lobby" method="post">
+                    <i onclick="toggle_popup('create-lobby')" class='bx bx-x'></i>
+                    <h2 class="main-header">Lobby Controls</h2>
                     <h3 class="control-header">Game Mode</h3>
                     <div class="game-mode-select game-option-container">
                         <input onclick="selectGameOption(this, 'game-mode-select')" name="DUEL"         value="DUEL"        type="button" class="game-option game-mode selected">
@@ -130,32 +128,53 @@
                     <h3 class="control-header">Difficulty</h3>
                     <div class="game-difficulty-select game-option-container">
                         <input onclick="selectGameOption(this, 'game-difficulty-select')" name="EASY"   value="EASY"    type="button" id="easy-difficulty"     class="game-option game-mode selected">
-                        <input onclick="selectGameOption(this, 'game-difficulty-select')" name="MEDIUM" value="MEDIUM"  type="button" id="medium-difficulty" class="game-option game-mode disabled">
-                        <input onclick="selectGameOption(this, 'game-difficulty-select')" name="HARD"   value="HARD"    type="button" id="hard-difficulty"     class="game-option game-mode disabled">
+                        <input onclick="selectGameOption(this, 'game-difficulty-select')" name="MEDIUM" value="MEDIUM"  type="button" id="medium-difficulty" class="game-option game-mode">
+                        <input onclick="selectGameOption(this, 'game-difficulty-select')" name="HARD"   value="HARD"    type="button" id="hard-difficulty"     class="game-option game-mode">
                         <input type="hidden" id="game-difficulty-select" name="game-difficulty" value="EASY">
                     </div>
                     <h3 class="control-header">Language</h3>
                     <div class="game-language-select game-option-container">
-                        <input onclick="selectGameOption(this, 'game-language-select')" name="PYTHON3"    value="PYTHON3"    type="button" id="python-language"     class="game-option game-language selected">
-                        <input onclick="selectGameOption(this, 'game-language-select')" name="JAVA"       value="JAVA"       type="button" id="java-language"       class="game-option game-language disabled">
-                        <input onclick="selectGameOption(this, 'game-language-select')" name="JAVASCRIPT" value="JAVASCRIPT" type="button" id="javascript-language" class="game-option game-language">
+                        <input onclick="selectGameOption(this, 'game-language-select')" name="Python3"    value="Python3"    type="button" id="python-language"     class="game-option game-language selected">
+                        <input onclick="selectGameOption(this, 'game-language-select')" name="Java"       value="Java"       type="button" id="java-language"       class="game-option game-language disabled">
+                        <input onclick="selectGameOption(this, 'game-language-select')" name="JavaScript" value="JavaScript" type="button" id="javascript-language" class="game-option game-language">
                         <input onclick="selectGameOption(this, 'game-language-select')" name="C++"        value="C++"        type="button" id="c++-language"        class="game-option game-language">
-                        <input type="hidden" id="game-language-select" name="game-language" value="PYTHON3">
+                        <input type="hidden" id="game-language-select" name="game-language" value="Python3">
                     </div>
                     <input type="hidden" id="room-code" value="{{room_code}}">
                     <button class="game-option create-lobby-button" type="submit" >Create Lobby</button>
             </form>
         </div>
+        <div id="start-options" class="start-option-container">
+            <div class="options">
+                <i onclick="toggle_start()" class='bx bx-x'></i>
+                <h2 class="main-header">Start Options</h2>
+                <div class="option-boxes">
+                    <div onclick="toggle_popup('create-lobby')" class="create-lobby option-box">
+                    <h1>Create Lobby</h1>
+                </div>
+                    <div class="join option-box">
+                        <h1>Join Lobby</h1>
+                        <div class="join-lobby-input">
+                            <label>
+                                <input id="room-input" type="text" placeholder="ROOM CODE...">
+                            </label>
+                            <i onclick="location.href = '/game/' + document.getElementById('room-input').value;" class='bx bx-log-in-circle'></i>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
 
         <div class="home-header">
-            <div onclick="toggle_popup('{{ start_mode }}')">
+            <div onclick="toggle_start()">
               <button id="reserve-pickup-button" class="reserve-pickup-button">
                   <span class="front">
                     start battling
                   </span>
               </button>
             </div>
-          </div>
+        </div>
 
         <div class="home-widgets">
 
@@ -202,6 +221,11 @@
       let toggle_profile_options = function () {
           profile_button.classList.toggle("active");
           toggle_popup("profile-options");
+      }
+
+      let toggle_start = function () {
+          toggle_popup('{{ start_mode }}');
+          toggle_focus_blur('start-options')
       }
   </script>
 

@@ -185,7 +185,7 @@ select {
   transform: translateY(-2px);
 }
 
-.create-lobby-container {
+.create-lobby-container, .start-option-container {
   position: absolute;
   display: none;
   top: 100px;
@@ -193,7 +193,7 @@ select {
   width: 100%;
   height: 100%;
 }
-.controls .bx-x {
+.controls .bx-x, .options .bx-x {
   position: absolute;
   top: 7px;
   left: 7px;
@@ -203,21 +203,21 @@ select {
 
   cursor: pointer;
 }
-.controls {
+.controls, .options {
   position: relative;
   display: flex;
-  z-index: 3;
   flex-direction: column;
   margin: auto;
+  z-index: 3;
+    width: 40%;
 
-  width: 40%;
   border-radius: 10px;
   padding: 20px;
 
   box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);;
   background: rgba(82, 82, 82, 1);
 }
-.controls-main-header {
+.main-header {
     color: #f4f4f4;
     font-size: 30px;
     border-bottom: 1px solid #313131;
@@ -278,6 +278,72 @@ select {
 .game-option.disabled, .game-option.disabled:hover {
     background: grey!important;
     cursor: not-allowed;
+}
+
+.start-option-container {
+  top: 30px;
+}
+.options {
+  justify-content: space-between;
+  z-index: 2;
+  padding: 35px;
+  width: auto;
+}
+.options .main-header {
+  margin-bottom: 15px;
+  border-bottom: 2px solid #313131;
+}
+.options .option-boxes {
+  display: flex;
+  flex-direction: row;
+}
+.options .option-box {
+  border-radius: 5px;
+  border: 2px solid #313131;
+  padding: 15px;
+  color: rgb(255, 255, 255);
+}
+.options .join h1 {
+  margin-bottom: 5px;
+}
+.options .create-lobby {
+  margin: auto 20px auto auto;
+  cursor: pointer;
+  background: #e37774;
+}
+.options .create-lobby:hover {
+  background: #EC625F;
+}
+
+.options .join {
+}
+.options .join-lobby-input {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+.join-lobby-input input {
+  padding: 5px;
+
+  background: none;
+  outline: none;
+  border: 2px solid #313131;
+  border-radius: 5px;
+  color: white;
+  font-family: 'Poppins', sans-serif;
+  font-weight: bold;
+
+  caret-color: white;
+}
+.join-lobby-input input::placeholder {
+  color: rgba(255, 255, 255, 0.8);
+  font-family: 'Poppins', sans-serif;
+  font-weight: bold;
+}
+.join-lobby-input .bx {
+  font-size: 25px;
+  margin-left: 5px;
+  cursor: pointer;
 }
 
 
@@ -404,7 +470,3 @@ select {
 }
 
 
-.revealed {
-  display: flex!important;
-  transition: ease-in-out;
-}

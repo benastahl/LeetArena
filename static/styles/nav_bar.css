@@ -110,6 +110,9 @@ section nav .navbar-logo {
   text-decoration: none;
   color: black;
 }
+.profile-options li[aria-selected='true'] {
+  background: #EC625F;
+}
 .profile-options li:hover {
   background: #EC625F;
   /*text-decoration: underline;*/

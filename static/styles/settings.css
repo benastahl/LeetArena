@@ -1,0 +1,60 @@
+* {
+    font-family: 'Poppins', sans-serif;
+}
+
+.settings-container {
+    position: absolute;
+    top: 250px;
+
+    height: 100%;
+    width: 100%;
+}
+.settings {
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+    padding: 10px;
+
+    width: 400px;
+    border-radius: 10px;
+
+    background: rgba(119, 119, 119, 0.68);
+    box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);;
+
+}
+.settings header {
+    text-align: center;
+    margin-bottom: 15px;
+
+    font-weight: bold;
+    font-size: 30px;
+
+    border-bottom: 3px solid #313131;
+}
+.settings button {
+    margin: auto auto 10px auto;
+    width: fit-content;
+    padding: 5px 10px;
+
+    border-radius: 10px;
+    color: #313131;
+    background: #f4f4f4;
+    font-weight: 700;
+    font-size: 20px;
+    font-family: 'Poppins', sans-serif;
+    border: 2px solid #313131;
+
+    cursor: pointer;
+}
+.settings button:hover {
+    background: #e76866 !important;  /*  */
+}
+.settings button.bx {
+    position: relative;
+    bottom: 0;
+    right: 0;
+    border-radius: 40px;
+    padding: 0;
+    height: 40px;
+    width: 40px;
+}

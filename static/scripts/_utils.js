@@ -2,8 +2,12 @@ const params = new Proxy(new URLSearchParams(window.location.search), {
   get: (searchParams, prop) => searchParams.get(prop),
 });
 function toggle_popup(id) {
-    console.log("toggled " + id)
-    document.getElementById(id).classList.toggle("revealed")
+    console.log("toggled " + id);
+    document.getElementById(id).classList.toggle("revealed");
+}
+
+function toggle_focus_blur(id) {
+    document.getElementById(id).classList.toggle("focus-blur");
 }
 
 function selectGameOption (selectedOption, option_type_class) {
@@ -36,3 +40,6 @@ function selectGameOption (selectedOption, option_type_class) {
 
 }
 
+function redirect(path) {
+    location.href = path;
+}

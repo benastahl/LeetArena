@@ -18,3 +18,12 @@ section{
   border-bottom-right-radius: 20px;
   transition: all 0.5s ease;
 }
+
+/*.focus-blur {*/
+/*  backdrop-filter: blur(10px)*/
+/*}*/
+
+.revealed {
+  display: flex!important;
+  transition: ease-in-out;
+}
